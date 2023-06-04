@@ -20,6 +20,9 @@ import json
 from jsonformatter import JsonFormatter
 from time import sleep
 
+# High Precision Floating Point
+from decimal import *
+
 # GUI  Imports
 from PyQt5 import (QtWidgets, QtCore)
 from PyQt5.QtWidgets import (
@@ -68,9 +71,9 @@ class PositionerWidget(QWidget):
     def getZoomPath(self,inum):
         return (
             (self.zoomPath["min_x"][inum],
-            self.zoomPath["min_x"][inum],
-            self.zoomPath["min_x"][inum],
-            self.zoomPath["min_x"][inum]))
+            self.zoomPath["max_x"][inum],
+            self.zoomPath["min_y"][inum],
+            self.zoomPath["max_y"][inum]))
 
     def setZoom(self, zoomValue):
         self.zoomValue = zoomValue
@@ -78,10 +81,10 @@ class PositionerWidget(QWidget):
     def paintEvent(self, e):
         qp = QPainter()
         qp.begin(self)
-        for x in range(0,40):
-            for y in range(0,40):
+        for y in range(0,40):
+            for x in range(0,40):
                 x1 = x*5 + 5 
-                y1 = y*5 + 5
+                y1 = y*5 + 5 
                 self.drawRect(qp,x1,y1,5,5, self.image.CalcColorDot(x*5,y*5))
 
     def drawRect(self,painter,x,y,width,height,colornum):
@@ -102,11 +105,11 @@ class PositionerWidget(QWidget):
             center_y  = (self.max_real_y - float(self.point_set_y)/200.0 * self.real_length)
             if(args.verbose):
                 print("crx: %f cry: %f " % (center_x,center_y))
+            self.real_length = self.real_length * self.zoomValue 
             self.min_real_x = center_x - self.real_length/float(2)
             self.max_real_x = center_x + self.real_length/float(2)
             self.min_real_y = center_y - self.real_length/float(2)
             self.max_real_y = center_y + self.real_length/float(2)
-            self.real_length = self.real_length * self.zoomValue 
             self.image.RePosition(
                     self.min_real_x,
                     self.min_real_y,
@@ -116,6 +119,8 @@ class PositionerWidget(QWidget):
             self.repaint()
             self.appendPoint(self.min_real_x,self.max_real_x,self.min_real_y,self.max_real_y)
             self.parent.updateAfterZoomSelect()
+        else:
+            self.parent.tellUserTooManyZooms()
         
     def appendPoint(self,min_x,max_x,min_y,max_y):
         self.zoomPath["min_x"].append(min_x)
@@ -158,7 +163,7 @@ class PositionerWidget(QWidget):
 
     def writeZoomPathFile(self):
         if args.verbose:
-            print("Wrining Zoom Path to file:",args.ozfile)
+            print("Writing Zoom Path to file:",args.ozfile)
         lines = []
         file_obj = open(args.ozfile,"w")
         #lines = hjson.dumpsJSON(self.zoomPath,file_obj)
@@ -407,6 +412,11 @@ class MainWindow(QMainWindow):
             print(zoom_path_cnt_text)
         self.checkWriteZoomPath()
 
+    def tellUserTooManyZooms(self):
+        msg_txt = "All image locations are defined"
+        dlg = FlexDialog("Error",msg_txt)
+        dlg.exec()
+
     def checkWriteZoomPath(self):
         if(args.ozfile != ""):
             if (self.positionerWidget.getPoints() == template["num_images"]):
@@ -425,14 +435,12 @@ class MainWindow(QMainWindow):
                 self.updateImgProgressBar(img_value)
             all_images.append(new_image)
             if args.verbose:
-                print("Interactive Gened image:",inum)    
+                print("Interactive Gened image:",(inum+1))    
             bg_value = int(((inum+1)*100) /  template["num_images"])
-            if args.verbose:
-                print("BG :",bg_value)    
             self.updateBgProgressBar(bg_value)
         genBackgroundFile()
         msg_txt = "The Background Imageas was Gernated.\nFile location:%s" % (args.ozfile)
-        dlg = FlexDialog("Success",msg_text)
+        dlg = FlexDialog("Success",msg_txt)
         dlg.exec()
 
 
@@ -459,7 +467,7 @@ def genImages():
         new_image.CalcColorAll()
         all_images.append(new_image)
         if args.verbose:
-            print("Gened image:",inum)
+            print("Gened image:",inum+1)
 
 def genBackgroundFile():
     bgImage = bmp.BmpFile( template["width"], template["height"]) 
@@ -489,7 +497,7 @@ all_images = []
 # CLI Parser
 parser = argparse.ArgumentParser(description='Mandelbrot Background')
 parser.add_argument("--ifile", help="Template file (.hjson)", default="templates/eight.json")
-parser.add_argument("--izfile", help="Input Zoom path file (.hjson)", default="zoom/default_eight.json")
+parser.add_argument("--izfile", help="Input Zoom path file (.hjson)", default="")
 parser.add_argument("--ofile", help="Output file (.bmp)", default="bg.bmp")
 parser.add_argument("--ozfile", help="Output Zoom path file (.hjson)", default="")
 parser.add_argument("-v", "--verbose", help="Increase output verbosity",action ="store_true") 
@@ -508,11 +516,17 @@ else:
     print(err_line)
     exit(1)
 # Zoom File Read
-is_real_zoom = os.path.isfile(args.izfile)
-if is_real_zoom:
-    if args.verbose:
-        print("Opening:",args.izfile)
-    zoom = hjson.load(open(args.izfile))
+if(args.izfile != ""):
+    is_real_zoom = os.path.isfile(args.izfile)
+    if is_real_zoom:
+        if(args.nogui):
+            if args.verbose:
+                print("Opening:",args.izfile)
+            zoom = hjson.load(open(args.izfile))
+        else:
+            err_line = "Error: Zoom input file only work with --nogui enabled"
+            print(err_line)
+            exit(1)
 # Gui or Not
 if(args.nogui):
     if(is_real_zoom == False):
@@ -523,6 +537,7 @@ if(args.nogui):
         genBackground()
 else:
     app = QApplication(sys.argv)
+    getcontext().prec = 16 
     w = MainWindow()
     w.show()
     app.exec()

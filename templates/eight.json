@@ -6,7 +6,7 @@
   "bits_per_color": 4,
   "brightness_shift": 4,
   "pixels_per_unit": 120,
-  "zoom": 0.1,
+  "high_precision": false,
   "images": [
     {
       "side_size": 2,

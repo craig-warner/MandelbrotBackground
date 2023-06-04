@@ -1,13 +1,12 @@
 {
-  "filename":"bgr_fbg.bmp",
   "num_images": 14,
   "bits_per_color": 5,
   "brightness_shift": 2,
   "width":1920,
   "height":1080,
   "rgb": "bgr",
+  "high_precision": false,
   "pixels_per_unit": 60,
-  "zoom": 0.3,
   "images": [
     {
       "side_size": 1,

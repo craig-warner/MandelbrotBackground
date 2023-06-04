@@ -38,7 +38,7 @@ class MandelImage:
 
     def SetUpCalc(self,MinX,MinY,MaxX,MaxY):
         if self.highPrecision:
-            self.threshold = Decimal('1000.0')
+            self.threshold = Decimal('100.0')
             self.MinA = Decimal(MinX)
             self.MaxA = Decimal(MaxX)
             self.MinDi = Decimal(MinY)

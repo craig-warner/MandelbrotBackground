@@ -2,4 +2,4 @@ hjson
 pyqt5
 pytest
 argparse
-jsonformatter
+decimal
