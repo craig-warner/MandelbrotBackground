@@ -22,12 +22,13 @@ from time import sleep
 
 # High Precision Floating Point
 from decimal import *
+Decimal('Infinity')
 
 # GUI  Imports
 from PyQt5 import (QtWidgets, QtCore)
 from PyQt5.QtWidgets import (
     QMainWindow, QApplication,
-    QLabel, QCheckBox, QComboBox, QListWidget, QLineEdit,
+    QLabel, QCheckBox, QComboBox, QListWidget, QListWidgetItem, QLineEdit,
     QLineEdit, QSpinBox, QDoubleSpinBox, QSlider,
     QHBoxLayout, QVBoxLayout, QToolBar, QAction, QStatusBar,
     QDialog, QDialogButtonBox, QFileDialog, QWidget, QProgressBar
@@ -43,6 +44,7 @@ from PyQt5.QtGui import (
 from mbg.version import __version__
 import mbg.mimage as mimage
 import mbg.bmp as bmp 
+import mbg.desktop as desktop 
 
 class PositionerWidget(QWidget):
     def __init__(self,parent):
@@ -61,7 +63,8 @@ class PositionerWidget(QWidget):
         self.setGeometry(QRect(0, 0, 200, 200))
         self.parent = parent
 
-        self.zoomValue = 0.5 
+        self.zoomValue = 0.95 
+        self.zoomIn= True 
 
         print("Positioner Widget")
 
@@ -74,6 +77,9 @@ class PositionerWidget(QWidget):
             self.zoomPath["max_x"][inum],
             self.zoomPath["min_y"][inum],
             self.zoomPath["max_y"][inum]))
+
+    def setZoomIn(self, zoom_in):
+        self.zoomIn.zoom_in
 
     def setZoom(self, zoomValue):
         self.zoomValue = zoomValue
@@ -105,7 +111,10 @@ class PositionerWidget(QWidget):
             center_y  = (self.max_real_y - float(self.point_set_y)/200.0 * self.real_length)
             if(args.verbose):
                 print("crx: %f cry: %f " % (center_x,center_y))
-            self.real_length = self.real_length * self.zoomValue 
+            if(self.zoomIn):
+                self.real_length = self.real_length * self.zoomValue 
+            else:
+                self.real_length = self.real_length / self.zoomValue 
             self.min_real_x = center_x - self.real_length/float(2)
             self.max_real_x = center_x + self.real_length/float(2)
             self.min_real_y = center_y - self.real_length/float(2)
@@ -134,6 +143,7 @@ class PositionerWidget(QWidget):
             self.pathAllDefined = False 
 
     def init_settings(self):
+        self.pathAllDefined = False
         self.pointsDefined = 0 
         self.zoomPath = {} 
         self.zoomPath["min_x"] = []
@@ -141,9 +151,6 @@ class PositionerWidget(QWidget):
         self.zoomPath["min_y"] = []
         self.zoomPath["max_y"] = []
         self.appendPoint(-1.0,2.0,-1.5,1.5)
-
-        self.pathAllDefined = False
-        self.pointsDefined = 0 
 
         self.min_real_x = float('-1.0')
         self.max_real_x = float('2.0')
@@ -217,12 +224,14 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         # Start the GUI 
+        self.desktop_helper = desktop.Desktop()
         self.initUI()
 
     def initUI(self):
         self.wid = QtWidgets.QWidget(self)
         self.setCentralWidget(self.wid)
-        self.setGeometry(0,100,512,384)
+        self.setGeometry(100,100,512,384)
+        self.setFixedSize(512,384)
         self.setWindowTitle("Mandelbrot Background")
         self.createActions()
         self.addMenuToWindow()
@@ -300,10 +309,11 @@ class MainWindow(QMainWindow):
         # V1
         #   H1
         #     V2 V3
+        #          H2
         #   V4
         #     w
-        #     H2
         #     H3
+        #     H4
 
         vbox1 = QtWidgets.QVBoxLayout()
         vbox2 = QtWidgets.QVBoxLayout()
@@ -313,6 +323,7 @@ class MainWindow(QMainWindow):
         hbox1 = QtWidgets.QHBoxLayout()
         hbox2 = QtWidgets.QHBoxLayout()
         hbox3 = QtWidgets.QHBoxLayout()
+        hbox4 = QtWidgets.QHBoxLayout()
 
         self.positionerWidget = PositionerWidget(self)
         vbox2.addWidget(self.positionerWidget)
@@ -321,8 +332,30 @@ class MainWindow(QMainWindow):
         vbox2_widget.setLayout(vbox2)
         vbox2_widget.setFixedWidth(200)
 
+        template_label  =  QtWidgets.QLabel()
+        template_label_text = "Template File: %s" % (args.ifile)
+        template_label.setText(template_label_text)
+        template_label.setFont(QFont('SansSerif', 10))
+        vbox3.addWidget(template_label)
+
+        desktop_size_label  =  QtWidgets.QLabel()
+        desktop_size_label_text = "Select your desktop size"
+        desktop_size_label.setText(desktop_size_label_text)
+        desktop_size_label.setFont(QFont('SansSerif', 10))
+        vbox3.addWidget(desktop_size_label)
+
+        self.desktop_list_widget =  QListWidget(self)
+        all_desktops = self.desktop_helper.GetAllSizes()
+        all_desktop_items = []
+        for d in all_desktops:
+            all_desktop_items.append(QListWidgetItem(d))    
+        for di in all_desktop_items:
+            self.desktop_list_widget.addItem(di)
+        self.desktop_list_widget.setCurrentRow(self.desktop_helper.GetDefault())
+        vbox3.addWidget(self.desktop_list_widget)
+
         slider_title= QtWidgets.QLabel()
-        slider_title.setText("Zoom In Magnification (1x to 20x)")
+        slider_title.setText("Zoom In Magnification (1x to 10x)")
         slider_title.setFont(QFont('SansSerif', 10))
         vbox3.addWidget(slider_title)
 
@@ -331,7 +364,13 @@ class MainWindow(QMainWindow):
         self.slider.setMaximum(20)
         self.slider.setValue(2)
         self.slider.valueChanged.connect(self.doSliderValueChange)
-        vbox3.addWidget(self.slider)
+        hbox2.addWidget(self.slider)
+
+        self.zoomin_check_box = QCheckBox("Zoom In")
+        self.zoomin_check_box.setChecked(True)
+        self.zoomin_check_box.stateChanged.connect(self.doZoomInChanged)
+        hbox2.addWidget(self.zoomin_check_box)
+        vbox3.addLayout(hbox2)
 
         reset_button = QtWidgets.QPushButton('Reset Zoom Path', self)
         reset_button.setCheckable(True)
@@ -352,33 +391,38 @@ class MainWindow(QMainWindow):
         bg_progress_label = QtWidgets.QLabel()
         bg_progress_label.setText("Background Generation Progress:")
         bg_progress_label.setFont(QFont('SansSerif', 10))
-        hbox2.addWidget(bg_progress_label)
+        hbox3.addWidget(bg_progress_label)
 
         self.bg_progress_bar = QProgressBar(self)
         self.updateBgProgressBar(0)
-        hbox2.addWidget(self.bg_progress_bar)
+        hbox3.addWidget(self.bg_progress_bar)
 
         img_progress_label = QtWidgets.QLabel()
         img_progress_label.setText("Image Generation Progress:")
         img_progress_label.setFont(QFont('SansSerif', 10))
-        hbox3.addWidget(img_progress_label)
+        hbox4.addWidget(img_progress_label)
 
         self.img_progress_bar = QProgressBar(self)
         self.updateImgProgressBar(0)
-        hbox3.addWidget(self.img_progress_bar)
+        hbox4.addWidget(self.img_progress_bar)
 
         hbox1.addWidget(vbox2_widget)
         hbox1.addLayout(vbox3)
         vbox1.addLayout(hbox1)
         vbox1.addLayout(vbox4)
-        vbox1.addLayout(hbox2)
         vbox1.addLayout(hbox3)
+        vbox1.addLayout(hbox4)
 
         self.wid.setLayout(vbox1)
 
+    def doZoomInChanged(self):
+        if args.verbose:
+            print("ZoomIn Change")
+        self.positionerWidget.setZoomIn(self.zoomin_check_box.isChecked())
+
     def doSliderValueChange(self):
         value = self.slider.value()
-        zoomValue =  (float(1.0)/float(value))
+        zoomValue =  (float(0.05) * (21-value))
         self.positionerWidget.setZoom(zoomValue)
 
     def doResetButton(self):
@@ -388,6 +432,9 @@ class MainWindow(QMainWindow):
         self.updateAfterZoomSelect()
 
     def doDrawButton(self):
+        # Get DesktopSize
+        desktop_size_num = self.desktop_list_widget.currentRow()
+        self.desktop_helper.SetDefault(desktop_size_num)
         if args.verbose:
             print("Draw Button")
         if template["num_images"] != self.positionerWidget.getPoints():
@@ -425,9 +472,10 @@ class MainWindow(QMainWindow):
     def genImagesInteractive(self):
         num_bits = template["bits_per_color"]
 
+        (pixels_per_unit,xpad,ypad) = desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
         for inum in range(0,template["num_images"]):
             (min_x, max_x , min_y , max_y) = self.positionerWidget.getZoomPath(inum)
-            num_dots = template["pixels_per_unit"] * template["images"][inum]["side_size"]
+            num_dots = pixels_per_unit * template["images"][inum]["side_size"]
             new_image = mimage.MandelImage(min_x,min_y,max_x,max_y,num_dots,num_dots,num_bits,template["high_precision"])
             for y in range(0,num_dots): 
                 new_image.CalcColorOneLine(y)
@@ -438,10 +486,11 @@ class MainWindow(QMainWindow):
                 print("Interactive Gened image:",(inum+1))    
             bg_value = int(((inum+1)*100) /  template["num_images"])
             self.updateBgProgressBar(bg_value)
-        genBackgroundFile()
-        msg_txt = "The Background Imageas was Gernated.\nFile location:%s" % (args.ozfile)
+        genBackgroundFile(pixels_per_unit,xpad,ypad)
+        msg_txt = "The Background Image was Gernated.\nFile location:%s" % (args.ozfile)
         dlg = FlexDialog("Success",msg_txt)
         dlg.exec()
+        exit(0)
 
 
     def genZoomCountText(self):
@@ -453,7 +502,7 @@ class MainWindow(QMainWindow):
 # mbg Helper Functions 
 #
 
-def genImages():
+def genImages(pixels_per_unit):
     num_bits = template["bits_per_color"]
 
     for inum in range(0,template["num_images"]):
@@ -462,31 +511,34 @@ def genImages():
         min_y = zoom["min_y"][inum]
         max_y = zoom["max_y"][inum]
 
-        num_dots = template["pixels_per_unit"] * template["images"][inum]["side_size"]
+        num_dots = pixels_per_unit * template["images"][inum]["side_size"]
         new_image = mimage.MandelImage(min_x,min_y,max_x,max_y,num_dots,num_dots,num_bits,template["high_precision"])
         new_image.CalcColorAll()
         all_images.append(new_image)
         if args.verbose:
             print("Gened image:",inum+1)
 
-def genBackgroundFile():
-    bgImage = bmp.BmpFile( template["width"], template["height"]) 
+def genBackgroundFile(pixels_per_unit,padx,pady):
+    width = desktop_helper.GetXSize()
+    height = desktop_helper.GetYSize()
+    bgImage = bmp.BmpFile( width, height) 
     for inum in range(0,template["num_images"]):
         bgImage.ColorImage(
-                template["images"][inum]["bg_x"], # start x
-                template["images"][inum]["bg_y"], # start y
-                template["pixels_per_unit"] * template["images"][inum]["side_size"], # size
+                template["images"][inum]["bg_x"]*pixels_per_unit+padx, # start x
+                template["images"][inum]["bg_y"]*pixels_per_unit+pady, # start y
+                pixels_per_unit * template["images"][inum]["side_size"], # size
                 template["rgb"], # rbg
                 template["bits_per_color"], # bits_per_color
                 template["brightness_shift"], # bright_shift
                 all_images[inum])
         if args.verbose:
-            print("Moved image to Background. Image:",inum)
+            print("Moved image to Background. Image:",(inum+1))
     bgImage.Save(args.ofile)
 
 def genBackground():
-    genImages()            
-    genBackgroundFile()
+    (pixels_per_unit,padx,pady) = desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
+    genImages(pixels_per_unit)            
+    genBackgroundFile(pixels_per_unit,padx,pady)
 
 #
 # mbg Start
@@ -497,11 +549,12 @@ all_images = []
 # CLI Parser
 parser = argparse.ArgumentParser(description='Mandelbrot Background')
 parser.add_argument("--ifile", help="Template file (.hjson)", default="templates/eight.json")
-parser.add_argument("--izfile", help="Input Zoom path file (.hjson)", default="")
-parser.add_argument("--ofile", help="Output file (.bmp)", default="bg.bmp")
+parser.add_argument("--ofile", help="Output file (.bmp)", default="images/bg.bmp")
 parser.add_argument("--ozfile", help="Output Zoom path file (.hjson)", default="")
 parser.add_argument("-v", "--verbose", help="Increase output verbosity",action ="store_true") 
 parser.add_argument("--nogui", help="No Graphical User Interface",action ="store_true") 
+parser.add_argument("--izfile", help="NoGUI: Input Zoom path file (.hjson)", default="")
+parser.add_argument("--display", help="NoGUI: Display Size File (.hjson)",default="display/sz1920x1080.json") 
 parser.add_argument('-V', '--version', action='version', version="%(prog)s ("+__version__+")")
 args = parser.parse_args()
 
@@ -516,17 +569,44 @@ else:
     print(err_line)
     exit(1)
 # Zoom File Read
-if(args.izfile != ""):
+if(args.nogui):
     is_real_zoom = os.path.isfile(args.izfile)
     if is_real_zoom:
-        if(args.nogui):
-            if args.verbose:
-                print("Opening:",args.izfile)
-            zoom = hjson.load(open(args.izfile))
-        else:
-            err_line = "Error: Zoom input file only work with --nogui enabled"
+        if args.verbose:
+            print("Opening:",args.izfile)
+        zoom = hjson.load(open(args.izfile))
+        if(len(zoom["min_x"]) != template["num_images"]):
+            err_line = "Error: Zoom File does not work wih template %d %d" % (len(zoom["min_x"]),template["num_images"])
             print(err_line)
             exit(1)
+    else:
+        err_line = "Error: Zoom could not be loaded"
+        print(err_line)
+        exit(1)
+else:
+    if(args.izfile != ""):
+        err_line = "Error: Zoom input file only works when --nogui is enabled"
+        print(err_line)
+        exit(1)
+# Desktop Helper
+desktop_helper = desktop.Desktop()
+# Display File 
+if(args.nogui):
+    is_real_display = os.path.isfile(args.display)
+    if is_real_display:
+        if args.verbose:
+            print("Opening:",args.display)
+        display = hjson.load(open(args.display))
+        desktop_helper.SetDefaultWidthHeight(display["width"],display["height"])
+    else:
+        err_line = "Error: Zoom could not be loaded"
+        print(err_line)
+        exit(1)
+else:
+    if(args.display != "display/sz1920x1080.json"):
+        err_line = "Error: Display input file only works when --nogui is enabled"
+        print(err_line)
+        exit(1)
 # Gui or Not
 if(args.nogui):
     if(is_real_zoom == False):
@@ -537,7 +617,6 @@ if(args.nogui):
         genBackground()
 else:
     app = QApplication(sys.argv)
-    getcontext().prec = 16 
     w = MainWindow()
     w.show()
     app.exec()

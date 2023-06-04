@@ -53,7 +53,7 @@ class BmpFile():
                     val_blue = val_high;
                 # RGB
                 # DEBUG: print(val_red,val_blue,val_green)
-                self.b.setPixel(start_x+x,start_y+y,(val_red,val_green,val_blue))
+                self.b.setPixel(start_x+x,start_y+size-1-y,(val_red,val_green,val_blue))
                 dot_num = dot_num + 1
     def Save(self,filename):
         self.b.write(filename)
