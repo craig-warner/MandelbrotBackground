@@ -1,7 +1,7 @@
 {
     "num_images": 14,
     "rgb": "bgr",
-    "bits_per_color": 5,
+    "bits_per_color": 4,
     "brightness_shift": 2,
     "x_units": 32,
     "y_units": 16,

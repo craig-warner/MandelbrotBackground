@@ -22,7 +22,11 @@ from time import sleep
 
 # High Precision Floating Point
 from decimal import *
+# more than 3 days to finish
+#getcontext().prec = 1024
+getcontext().prec = 64 
 Decimal('Infinity')
+# 1024 Decimal precision
 
 # GUI  Imports
 from PyQt5 import (QtWidgets, QtCore)
