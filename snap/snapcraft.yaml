@@ -3,7 +3,7 @@ version: '1.0'
 summary: Mandelbrot Drawer
 description: |
   Create your own Mandelbrot decktop backgrounds
-confinement: devmode
+confinement: strict 
 base: core18
 
 grade: stable
@@ -19,3 +19,4 @@ parts:
 apps:
   mandelbrot-background:
     command: bin/mandelbrot-background
+    plugs: [home]
