@@ -9,7 +9,7 @@ base: core18
 grade: stable
 
 parts:
-  pymandelbrot:
+  mandelbrot-background:
     plugin: python
     python-version: python3
     source: https://github.com/craig-warner/MandelbrotBackground.git
