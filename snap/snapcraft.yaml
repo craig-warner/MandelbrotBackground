@@ -19,3 +19,4 @@ parts:
 apps:
   mandelbrot-background:
     command: bin/mandelbrot-background
+    plugs: [zoom, mbg, display, images, templates]

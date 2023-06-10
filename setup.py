@@ -21,5 +21,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    scripts=['mbg.py'],
+    scripts=['bin/mandelbrot-background'],
 )
