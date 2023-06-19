@@ -107,13 +107,13 @@ class PositionerWidget(QWidget):
             #self.point_set_y = event.pos().y() - 100
             self.point_set_x = event.pos().x()
             self.point_set_y = event.pos().y()
-            if(args.verbose):
+            if(verbose):
                 print("x: %d y: %d " % (event.pos().x(),event.pos().y()))
                 print("minx: %f miny: %f " % (self.min_real_x,self.min_real_y))
                 print("maxx: %f maxy: %f " % (self.max_real_x,self.max_real_y))
             center_x = (self.min_real_x + float(self.point_set_x)/200.0 * self.real_length)
             center_y  = (self.max_real_y - float(self.point_set_y)/200.0 * self.real_length)
-            if(args.verbose):
+            if(verbose):
                 print("crx: %f cry: %f " % (center_x,center_y))
             if(self.zoomIn):
                 self.real_length = self.real_length * self.zoomValue 
@@ -173,18 +173,19 @@ class PositionerWidget(QWidget):
         self.repaint()
 
     def writeZoomPathFile(self):
-        if args.verbose:
-            print("Writing Zoom Path to file:",args.ozfile)
-        lines = []
-        file_obj = open(args.ozfile,"w")
+        print("not reachable")
+        #if args.verbose:
+        #    print("Writing Zoom Path to file:",args.ozfile)
+        #lines = []
+        #file_obj = open(args.ozfile,"w")
         #lines = hjson.dumpsJSON(self.zoomPath,file_obj)
         #file_obj.close()
 
-        lines = json.dumps(self.zoomPath, indent=4, separators=(", ", " : "))
-        for l in (lines):
-            file_obj.write(l)
-
-        file_obj.close()
+        #lines = json.dumps(self.zoomPath, indent=4, separators=(", ", " : "))
+        #for l in (lines):
+        #    file_obj.write(l)
+        #
+        #file_obj.close()
 
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
@@ -281,8 +282,8 @@ class MainWindow(QMainWindow):
         self.aboutAction.triggered.connect(self.doAbout)
 
     def doLoadTemplate(self):
-        if(args.verbose):
-            print("Load Template")
+        #if(args.verbose):
+        #    print("Load Template")
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         self.template_file_name, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","JSON Files (*.json);; HJSON Files (*.hjson)", options=options)
@@ -421,8 +422,8 @@ class MainWindow(QMainWindow):
         self.wid.setLayout(vbox1)
 
     def doZoomInChanged(self):
-        if args.verbose:
-            print("ZoomIn Change")
+        #if args.verbose:
+        #    print("ZoomIn Change")
         self.positionerWidget.setZoomIn(self.zoomin_check_box.isChecked())
 
     def doSliderValueChange(self):
@@ -431,8 +432,8 @@ class MainWindow(QMainWindow):
         self.positionerWidget.setZoom(zoomValue)
 
     def doResetButton(self):
-        if args.verbose:
-            print("Reset Button")
+#        if args.verbose:
+#            print("Reset Button")
         self.positionerWidget.reset()
         self.updateAfterZoomSelect()
 
@@ -440,8 +441,8 @@ class MainWindow(QMainWindow):
         # Get DesktopSize
         desktop_size_num = self.desktop_list_widget.currentRow()
         self.desktop_helper.SetDefault(desktop_size_num)
-        if args.verbose:
-            print("Draw Button")
+        #if args.verbose:
+        #    print("Draw Button")
         if template["num_images"] != self.positionerWidget.getPoints():
             print("Error")
             dlg = FlexDialog("Error","Not enough image locations defined.\nClick on the Mandelbrot image to define more image locations.")
@@ -456,12 +457,12 @@ class MainWindow(QMainWindow):
         self.img_progress_bar.setValue(value)
 
     def updateAfterZoomSelect(self):
-        if args.verbose:
-            print("Update After Zoom Select")
+        #if args.verbose:
+        #    print("Update After Zoom Select")
         zoom_path_cnt_text = self.genZoomCountText()
         self.zoom_path_cnt.setText(zoom_path_cnt_text)
-        if args.verbose:
-            print(zoom_path_cnt_text)
+        #if args.verbose:
+        #    print(zoom_path_cnt_text)
         self.checkWriteZoomPath()
 
     def tellUserTooManyZooms(self):
@@ -470,14 +471,15 @@ class MainWindow(QMainWindow):
         dlg.exec()
 
     def checkWriteZoomPath(self):
-        if(args.ozfile != ""):
-            if (self.positionerWidget.getPoints() == template["num_images"]):
-                self.positionerWidget.writeZoomPathFile()
+        if(ofile == ""):
+            print("not possible")
+        #if(args.ozfile != ""):
+        #    if (self.positionerWidget.getPoints() == template["num_images"]):
+        #        self.positionerWidget.writeZoomPathFile()
 
     def genImagesInteractive(self):
         num_bits = template["bits_per_color"]
-
-        (pixels_per_unit,xpad,ypad) = desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
+        (pixels_per_unit,xpad,ypad) = self.desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
         for inum in range(0,template["num_images"]):
             (min_x, max_x , min_y , max_y) = self.positionerWidget.getZoomPath(inum)
             num_dots = pixels_per_unit * template["images"][inum]["side_size"]
@@ -487,12 +489,12 @@ class MainWindow(QMainWindow):
                 img_value = int(((y+1)*100) / num_dots)
                 self.updateImgProgressBar(img_value)
             all_images.append(new_image)
-            if args.verbose:
-                print("Interactive Gened image:",(inum+1))    
+            #if args.verbose:
+            #    print("Interactive Gened image:",(inum+1))    
             bg_value = int(((inum+1)*100) /  template["num_images"])
             self.updateBgProgressBar(bg_value)
         genBackgroundFile(pixels_per_unit,xpad,ypad)
-        msg_txt = "The Background Image was Gernated.\nFile location:%s" % (args.ozfile)
+        msg_txt = "The Background Image was Gernated.\nFile location:%s" % (ofile)
         dlg = FlexDialog("Success",msg_txt)
         dlg.exec()
         exit(0)
@@ -520,8 +522,8 @@ def genImages(pixels_per_unit):
         new_image = mimage.MandelImage(min_x,min_y,max_x,max_y,num_dots,num_dots,num_bits,template["high_precision"])
         new_image.CalcColorAll()
         all_images.append(new_image)
-        if args.verbose:
-            print("Gened image:",inum+1)
+        #if args.verbose:
+        #    print("Gened image:",inum+1)
 
 def genBackgroundFile(pixels_per_unit,padx,pady):
     width = desktop_helper.GetXSize()
@@ -538,7 +540,7 @@ def genBackgroundFile(pixels_per_unit,padx,pady):
                 all_images[inum])
         if verbose:
             print("Moved image to Background. Image:",(inum+1))
-    bgImage.Save(args.ofile)
+    bgImage.Save(ofile)
 
 def genBackground():
     (pixels_per_unit,padx,pady) = desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
@@ -564,6 +566,7 @@ all_images = []
 #parser.add_argument("--display", help="NoGUI: Display Size File (.hjson)",default="display/sz1920x1080.json") 
 #parser.add_argument('-V', '--version', action='version', version="%(prog)s ("+__version__+")")
 #args = parser.parse_args()
+ofile = "mbg8.bmp"
 verbose = False
 # Template File Read 
 template={}
