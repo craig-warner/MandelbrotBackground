@@ -21,5 +21,13 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    scripts=['bin/mandelbrot-background'],
+    install_requires=['PyQt5>=5.15.0','hjson>=3.1.0','jsonformatter>=0.3.2','argparse>=1.4.0'],
+    scripts=['bin/mandelbrot-background',
+            "bin/mbg.py",
+            "bin/bmp.py",
+            "bin/desktop.py",
+            "bin/mimage.py",
+            "bin/version.py",
+            "bin/eight.json"
+            ],
 )

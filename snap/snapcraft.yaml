@@ -1,22 +1,73 @@
 name: mandelbrot-background
-version: '1.0'
+version: '1.2'
 summary: Mandelbrot Drawer
 description: |
-  Create your own Mandelbrot decktop backgrounds
-confinement: strict 
+  Create your own Mandelbrot desktop backgrounds
+#confinement: strict 
+confinement: devmode 
 base: core18
-
 grade: stable
+icon: snap/gui/mandelbrot-background.png
 
 parts:
-  mandelbrot-background:
+  desktop-qt5:
+    build-packages:
+      - qtbase5-dev
+      - dpkg-dev
+    make-parameters:
+      - FLAVOR=qt5
+    plugin: make
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5
+      - try: [appmenu-qt5] # not available on core18
+      - locales-all
+      - xdg-user-dirs
+
+  mainapp:
+    after: [desktop-qt5]
     plugin: python
     python-version: python3
-    source: https://github.com/craig-warner/MandelbrotBackground.git
+    source-type: local 
+#    source: [ 'bin', 'display', 'mbg', 'templates', 'zoom', 'mbg.py'] 
+    source: .
+#    requirements: requirements.txt
     stage-packages:
     - python-six
+    - python3-pyqt5
+    - python-json-tricks
+
+#  mandelbrot-background:
+#    after: [mainapp]
+#    plugin: python
+#    python-version: python3
+#    source-type: local 
+#    source: . 
+#    organize: [ "mbg.py: mbg.py", "bin/__init__.py" "bin/__init__.py 
+#    - bin/bmp.py: bin/__init__.py 
+
+
+#  readonlydata:
+#    after: [mainapp]
+#    plugin: dump
+#    source: 
+#    - display 
+#    - templates 
+#    - zoom
+#    organize:
+#      '*' : $SNAP_DATA/readonly/
 
 apps:
   mandelbrot-background:
     command: bin/mandelbrot-background
-    plugs: [home]
+    plugs: ['desktop', 'framebuffer', 'camera', 'network', 'home', 'opengl', 'x11']

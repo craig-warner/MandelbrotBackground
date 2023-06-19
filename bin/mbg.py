@@ -5,9 +5,9 @@
 Mandelbrot Background
 author: Craig Warner
     This program generates a desktop background composed of several
-Mandlebrot images.  The images are a sequence of images starting with a
-standard Mandelbrot image, then zooming-in and changing focus
-for each subsequent image.     
+Mandlebrot images.  The images are a sequence of images start with a
+standard Mandelbortt images, then setep by step magnify the and focus
+in on one location in the Mandelbrt space.     
 """
 
 # External Imports
@@ -45,10 +45,10 @@ from PyQt5.QtGui import (
 )
 
 # MBG Imports  
-from mbg.version import __version__
-import mbg.mimage as mimage
-import mbg.bmp as bmp 
-import mbg.desktop as desktop 
+from version import __version__
+import mimage as mimage
+import bmp as bmp
+import desktop as desktop
 
 class PositionerWidget(QWidget):
     def __init__(self,parent):
@@ -535,7 +535,7 @@ def genBackgroundFile(pixels_per_unit,padx,pady):
                 template["bits_per_color"], # bits_per_color
                 template["brightness_shift"], # bright_shift
                 all_images[inum])
-        if args.verbose:
+        if verbose:
             print("Moved image to Background. Image:",(inum+1))
     bgImage.Save(args.ofile)
 
@@ -551,76 +551,51 @@ def genBackground():
 all_images = []
 
 # CLI Parser
-parser = argparse.ArgumentParser(description='Mandelbrot Background')
-parser.add_argument("--ifile", help="Template file (.hjson)", default="templates/eight.json")
-parser.add_argument("--ofile", help="Output file (.bmp)", default="images/bg.bmp")
-parser.add_argument("--ozfile", help="Output Zoom path file (.hjson)", default="")
-parser.add_argument("-v", "--verbose", help="Increase output verbosity",action ="store_true") 
-parser.add_argument("--nogui", help="No Graphical User Interface",action ="store_true") 
-parser.add_argument("--izfile", help="NoGUI: Input Zoom path file (.hjson)", default="")
-parser.add_argument("--display", help="NoGUI: Display Size File (.hjson)",default="display/sz1920x1080.json") 
-parser.add_argument('-V', '--version', action='version', version="%(prog)s ("+__version__+")")
-args = parser.parse_args()
-
+#parser = argparse.ArgumentParser(description='Mandelbrot Background')
+#parser.add_argument("--ifile", help="Template file (.hjson)", default="~/eight.json")
+#parser.add_argument("--ofile", help="Output file (.bmp)", default="images/bg.bmp")
+#parser.add_argument("--ozfile", help="Output Zoom path file (.hjson)", default="")
+#parser.add_argument("-v", "--verbose", help="Increase output verbosity",action ="store_true") 
+#parser.add_argument("--nogui", help="No Graphical User Interface",action ="store_true") 
+#parser.add_argument("--izfile", help="NoGUI: Input Zoom path file (.hjson)", default="")
+#parser.add_argument("--display", help="NoGUI: Display Size File (.hjson)",default="display/sz1920x1080.json") 
+#parser.add_argument('-V', '--version', action='version', version="%(prog)s ("+__version__+")")
+#args = parser.parse_args()
+verbose = False
 # Template File Read 
-is_real_template = os.path.isfile(args.ifile)
-if(is_real_template):
-    if args.verbose:
-        print("Opening:",args.ifile)
-    template = hjson.load(open(args.ifile))
-else:
-    err_line = "Error: Template File (%s) not found" % args.ifile
-    print(err_line)
-    exit(1)
-# Zoom File Read
-if(args.nogui):
-    is_real_zoom = os.path.isfile(args.izfile)
-    if is_real_zoom:
-        if args.verbose:
-            print("Opening:",args.izfile)
-        zoom = hjson.load(open(args.izfile))
-        if(len(zoom["min_x"]) != template["num_images"]):
-            err_line = "Error: Zoom File does not work wih template %d %d" % (len(zoom["min_x"]),template["num_images"])
-            print(err_line)
-            exit(1)
-    else:
-        err_line = "Error: Zoom could not be loaded"
-        print(err_line)
-        exit(1)
-else:
-    if(args.izfile != ""):
-        err_line = "Error: Zoom input file only works when --nogui is enabled"
-        print(err_line)
-        exit(1)
-# Desktop Helper
-desktop_helper = desktop.Desktop()
-# Display File 
-if(args.nogui):
-    is_real_display = os.path.isfile(args.display)
-    if is_real_display:
-        if args.verbose:
-            print("Opening:",args.display)
-        display = hjson.load(open(args.display))
-        desktop_helper.SetDefaultWidthHeight(display["width"],display["height"])
-    else:
-        err_line = "Error: Zoom could not be loaded"
-        print(err_line)
-        exit(1)
-else:
-    if(args.display != "display/sz1920x1080.json"):
-        err_line = "Error: Display input file only works when --nogui is enabled"
-        print(err_line)
-        exit(1)
-# Gui or Not
-if(args.nogui):
-    if(is_real_zoom == False):
-        err_line = "Error: Zoom File (%s) not found" % args.izfile
-        print(err_line)
-        exit(1)
-    else:
-        genBackground()
-else:
-    app = QApplication(sys.argv)
-    w = MainWindow()
-    w.show()
-    app.exec()
+template={}
+template["num_images"] = 8
+template["rgb"] =  "bgr"
+template["bits_per_color"]=  4
+template["brightness_shift"]=  4
+template["x_units"]= 16
+template["y_units"]=  8
+template["high_precision"] = False
+template["images"][0]["side_size"] = 2
+template["images"][0]["bg_x"] = 0
+template["images"][0]["bg_y"] = 6
+template["images"][1]["side_size"] = 2
+template["images"][1]["bg_x"] = 2
+template["images"][1]["bg_y"] = 6
+template["images"][2]["side_size"] = 2
+template["images"][2]["bg_x"] = 0
+template["images"][2]["bg_y"] = 4
+template["images"][3]["side_size"] = 2
+template["images"][3]["bg_x"] = 2
+template["images"][3]["bg_y"] = 4
+template["images"][4]["side_size"] = 4
+template["images"][4]["bg_x"] = 4
+template["images"][4]["bg_y"] = 4
+template["images"][5]["side_size"] = 4
+template["images"][5]["bg_x"] = 0
+template["images"][5]["bg_y"] = 0
+template["images"][6]["side_size"] = 4
+template["images"][6]["bg_x"] = 4
+template["images"][6]["bg_y"] = 0
+template["images"][7]["side_size"] = 8
+template["images"][7]["bg_x"] = 8
+template["images"][7]["bg_y"] = 0
+app = QApplication(sys.argv)
+w = MainWindow()
+w.show()
+app.exec()
