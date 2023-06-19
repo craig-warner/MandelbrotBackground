@@ -550,7 +550,7 @@ def genBackground():
 
 all_images = []
 
-snap_env = os.environment.get('SNAP')
+#snap_env = os.environment.get('SNAP')
 
 # CLI Parser
 #parser = argparse.ArgumentParser(description='Mandelbrot Background')
