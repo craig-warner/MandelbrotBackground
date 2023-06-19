@@ -3,8 +3,8 @@ version: '1.2'
 summary: Mandelbrot Drawer
 description: |
   Create your own Mandelbrot desktop backgrounds
-#confinement: strict 
-confinement: devmode 
+confinement: strict 
+#confinement: devmode 
 base: core18
 grade: stable
 icon: snap/gui/mandelbrot-background.png
