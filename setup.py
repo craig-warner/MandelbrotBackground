@@ -24,7 +24,6 @@ setuptools.setup(
     #install_requires=['PyQt5>=5.8.0','hjson>=3.1.0','jsonformatter>=0.3.2','argparse>=1.4.0'],
     install_requires=['hjson>=3.1.0','jsonformatter>=0.3.2','argparse>=1.4.0'],
     scripts=['bin/mandelbrot-background',
-            "bin/mbg.py",
             "bin/bmp.py",
             "bin/desktop.py",
             "bin/mimage.py",
