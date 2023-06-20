@@ -1,6 +1,6 @@
 name: mandelbrot-background
 version: '1.2'
-summary: Mandelbrot Drawer
+summary: Mandelbrot Background Drawing App
 description: |
   Create your own Mandelbrot desktop backgrounds
 confinement: strict 
@@ -36,12 +36,13 @@ parts:
 
   mainapp:
     after: [desktop-qt5]
-    plugin: python
+    plugin: ['python', 'qmake']
     python-version: python3
     source-type: local 
 #    source: [ 'bin', 'display', 'mbg', 'templates', 'zoom', 'mbg.py'] 
-    source: .
+    source: . 
 #    requirements: requirements.txt
+    qt-version: qt5
     stage-packages:
     - python-six
     - python3-pyqt5

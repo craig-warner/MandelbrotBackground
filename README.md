@@ -1,1 +1,1 @@
-* CXL Memory Lake Monitor 
+* Mandelbrot Background Drawer 
