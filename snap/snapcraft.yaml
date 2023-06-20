@@ -69,5 +69,5 @@ parts:
 
 apps:
   mandelbrot-background:
-    command: bin/python3 $SNAP/bin/mandelbrot-background
+    command: desktop-launch bin/python3 $SNAP/bin/mandelbrot-background
     plugs: ['desktop', 'framebuffer', 'camera', 'network', 'home', 'opengl', 'x11']
