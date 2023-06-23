@@ -48,8 +48,7 @@ parts:
     - python3-pyqt5
     - python-json-tricks
    
-  readonlydata
-
+  readonlydata:
     after: [mainapp]
     plugin: dump 
     source: templates 
