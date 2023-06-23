@@ -26,6 +26,7 @@ class MandelImage:
             else:
                 dot = self.LowPColorDot(x,y)
             self.Dots.append(dot)
+    #       print("Dot",dot)
 
     def CalcColorAll(self):
         for y in range(0,self.YDots):
