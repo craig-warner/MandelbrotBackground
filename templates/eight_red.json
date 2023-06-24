@@ -1,4 +1,5 @@
 {
+  "version": "1.0",
   "num_images": 8,
   "rgb": "gbr",
   "bits_per_color": 4,

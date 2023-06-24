@@ -1,5 +1,5 @@
 name: mandelbrot-background
-version: '1.4'
+version: '1.5'
 summary: Mandelbrot Background Drawing App
 description: |
   Create your own Mandelbrot desktop backgrounds
@@ -48,12 +48,26 @@ parts:
     - python3-pyqt5
     - python-json-tricks
    
-  readonlydata:
+  templates:
     after: [mainapp]
     plugin: dump 
     source: templates 
     organize: 
       '*': templates/
+
+  zoom:
+    after: [mainapp]
+    plugin: dump 
+    source: zoom 
+    organize: 
+      '*': zoom/
+
+  display:
+    after: [mainapp]
+    plugin: dump 
+    source: display 
+    organize: 
+      '*': display/
 
 #  mandelbrot-background:
 #    after: [mainapp]
@@ -65,19 +79,8 @@ parts:
 #    - bin/bmp.py: bin/__init__.py 
 
 
-#  readonlydata:
-#    after: [mainapp]
-#    plugin: dump
-#    source: 
-#    - display 
-#    - templates 
-#    - zoom
-#    organize:
-#      '*' : $SNAP_DATA/readonly/
-
 apps:
   mandelbrot-background:
-  #  command: desktop-launch bin/python3 $SNAP/bin/mandelbrot-background
     command: desktop-launch $SNAP/bin/mandelbrot-background
     environment:
       DISABLE_WAYLAND: 1

@@ -1,6 +1,5 @@
 hjson
 pyqt5
-pytest
 argparse
 decimal
 jsonformatter

@@ -107,13 +107,13 @@ class PositionerWidget(QWidget):
             #self.point_set_y = event.pos().y() - 100
             self.point_set_x = event.pos().x()
             self.point_set_y = event.pos().y()
-            if(verbose):
+            if(args.verbose):
                 print("x: %d y: %d " % (event.pos().x(),event.pos().y()))
                 print("minx: %f miny: %f " % (self.min_real_x,self.min_real_y))
                 print("maxx: %f maxy: %f " % (self.max_real_x,self.max_real_y))
             center_x = (self.min_real_x + float(self.point_set_x)/200.0 * self.real_length)
             center_y  = (self.max_real_y - float(self.point_set_y)/200.0 * self.real_length)
-            if(verbose):
+            if(args.verbose):
                 print("crx: %f cry: %f " % (center_x,center_y))
             if(self.zoomIn):
                 self.real_length = self.real_length * self.zoomValue 
@@ -174,19 +174,18 @@ class PositionerWidget(QWidget):
 
     def writeZoomPathFile(self):
         print("not reachable")
-        #if args.verbose:
-        #    print("Writing Zoom Path to file:",args.ozfile)
-        #lines = []
-        #file_obj = open(args.ozfile,"w")
-        #lines = hjson.dumpsJSON(self.zoomPath,file_obj)
-        #file_obj.close()
+        if args.verbose:
+            print("Writing Zoom Path to file:",args.ozfile)
+        lines = []
+        file_obj = open(args.ozfile,"w")
+        lines = hjson.dumpsJSON(self.zoomPath,file_obj)
+        file_obj.close()
 
-        #lines = json.dumps(self.zoomPath, indent=4, separators=(", ", " : "))
-        #for l in (lines):
-        #    file_obj.write(l)
-        #
-        #file_obj.close()
-
+        lines = json.dumps(self.zoomPath, indent=4, separators=(", ", " : "))
+        for l in (lines):
+            file_obj.write(l)
+        
+        file_obj.close()
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -245,10 +244,10 @@ class MainWindow(QMainWindow):
         self.show()
 
     def createActions(self):
-    #    self.loadTemplateAction= QAction()
-    #    self.loadTemplateAction.setText("Load Template")
-    #    self.loadZoomAction= QAction()
-    #    self.loadZoomAction.setText("Load Zoom File")
+        self.loadTemplateAction= QAction()
+        self.loadTemplateAction.setText("Load Template")
+        self.loadZoomAction= QAction()
+        self.loadZoomAction.setText("Load Zoom File")
         self.generateBackgroundAction= QAction()
         self.generateBackgroundAction.setText("Generate Background")
         self.exitAppAction= QAction()
@@ -259,16 +258,10 @@ class MainWindow(QMainWindow):
 
     def addMenuToWindow(self):
 
-    #    toolbar = QToolBar("Toolbar")
-    #    self.addToolBar(toolbar)
-
-    #    toolbar.addAction(self.loadTemplateAction)
-    #    self.setStatusBar(QStatusBar(self))
-
         menu = self.menuBar()
         file_menu = menu.addMenu("&File")
-     #   file_menu.addAction(self.loadTemplateAction)
-     #   file_menu.addAction(self.loadZoomAction)
+        file_menu.addAction(self.loadTemplateAction)
+        file_menu.addAction(self.loadZoomAction)
         file_menu.addAction(self.generateBackgroundAction)
         file_menu.addSeparator()
         file_menu.addAction(self.exitAppAction)
@@ -276,31 +269,31 @@ class MainWindow(QMainWindow):
         help_menu = menu.addMenu("&Help")
         help_menu.addAction(self.aboutAction)
 
-     #   self.loadTemplateAction.triggered.connect(self.doLoadTemplate)
-     #   self.loadZoomAction.triggered.connect(self.doLoadZoom)
+        self.loadTemplateAction.triggered.connect(self.doLoadTemplate)
+        self.loadZoomAction.triggered.connect(self.doLoadZoom)
         self.generateBackgroundAction.triggered.connect(self.doDrawButton)
         self.exitAppAction.triggered.connect(self.doExitApp)
         self.aboutAction.triggered.connect(self.doAbout)
 
     def doLoadTemplate(self):
-        #if(args.verbose):
-        #    print("Load Template")
+        if(args.verbose):
+            print("Load Template")
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         self.template_file_name, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","JSON Files (*.json);; HJSON Files (*.hjson)", options=options)
         template = hjson.load(open(self.template_file_name))
 
-    #def doLoadZoom(self):
-    #    if(args.verbose):
-    #        print("Load Zoom")
-    #    options = QFileDialog.Options()
-    #    options |= QFileDialog.DontUseNativeDialog
-    #    self.zoom_file_name, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","JSON Files (*.json);; HJSON Files (*.hjson)", options=options)
-    #    zoom = hjson.load(open(self.zoom_file_name))
+    def doLoadZoom(self):
+        if(args.verbose):
+            print("Load Zoom")
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        self.zoom_file_name, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","JSON Files (*.json);; HJSON Files (*.hjson)", options=options)
+        zoom = hjson.load(open(self.zoom_file_name))
 
     def doGenerateBackground(self):
-    #    if(args.verbose):
-    #        print("Generating Background")
+        if(args.verbose):
+            print("Generating Background")
         genBackground(self.desktop_helper)
 
     def doExitApp(self):
@@ -339,8 +332,8 @@ class MainWindow(QMainWindow):
         vbox2_widget.setFixedWidth(200)
 
         template_label  =  QtWidgets.QLabel()
-#        template_label_text = "Template File: %s" % (args.ifile)
-        template_label_text = "Template 8 images"
+        template_label_text = "Template File: %s" % (args.ifile)
+        #template_label_text = "Template 8 images"
         template_label.setText(template_label_text)
         template_label.setFont(QFont('SansSerif', 10))
         vbox3.addWidget(template_label)
@@ -423,8 +416,8 @@ class MainWindow(QMainWindow):
         self.wid.setLayout(vbox1)
 
     def doZoomInChanged(self):
-        #if args.verbose:
-        #    print("ZoomIn Change")
+        if args.verbose:
+            print("ZoomIn Change")
         self.positionerWidget.setZoomIn(self.zoomin_check_box.isChecked())
 
     def doSliderValueChange(self):
@@ -433,8 +426,8 @@ class MainWindow(QMainWindow):
         self.positionerWidget.setZoom(zoomValue)
 
     def doResetButton(self):
-#        if args.verbose:
-#            print("Reset Button")
+        if args.verbose:
+            print("Reset Button")
         self.positionerWidget.reset()
         self.updateAfterZoomSelect()
 
@@ -442,8 +435,8 @@ class MainWindow(QMainWindow):
         # Get DesktopSize
         desktop_size_num = self.desktop_list_widget.currentRow()
         self.desktop_helper.SetDefault(desktop_size_num)
-        #if args.verbose:
-        #    print("Draw Button")
+        if args.verbose:
+            print("Draw Button")
         if template["num_images"] != self.positionerWidget.getPoints():
             print("Error")
             dlg = FlexDialog("Error","Not enough image locations defined.\nClick on the Mandelbrot image to define more image locations.")
@@ -459,12 +452,12 @@ class MainWindow(QMainWindow):
         self.img_progress_bar.setValue(value)
 
     def updateAfterZoomSelect(self):
-        #if args.verbose:
-        #    print("Update After Zoom Select")
+        if args.verbose:
+            print("Update After Zoom Select")
         zoom_path_cnt_text = self.genZoomCountText()
         self.zoom_path_cnt.setText(zoom_path_cnt_text)
-        #if args.verbose:
-        #    print(zoom_path_cnt_text)
+        if args.verbose:
+            print(zoom_path_cnt_text)
         self.checkWriteZoomPath()
 
     def tellUserTooManyZooms(self):
@@ -473,11 +466,11 @@ class MainWindow(QMainWindow):
         dlg.exec()
 
     def checkWriteZoomPath(self):
-        if(ofile == ""):
+        if(args.ofile == ""):
             print("not possible")
-        #if(args.ozfile != ""):
-        #    if (self.positionerWidget.getPoints() == template["num_images"]):
-        #        self.positionerWidget.writeZoomPathFile()
+        if(args.ozfile != ""):
+            if (self.positionerWidget.getPoints() == template["num_images"]):
+                self.positionerWidget.writeZoomPathFile()
 
     #def genImagesInteractive(self):
     #    worker = Worker(self.genImagesInteractiveThread) 
@@ -488,7 +481,7 @@ class MainWindow(QMainWindow):
         (pixels_per_unit,xpad,ypad) = self.desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
         for inum in range(0,template["num_images"]):
             (min_x, max_x , min_y , max_y) = self.positionerWidget.getZoomPath(inum)
-            if verbose:
+            if args.verbose:
                 print ( "min_x:",min_x, "max_x:",max_x, "min_y:",min_y, "max_y:",max_y)
             num_dots = pixels_per_unit * template["images"][inum]["side_size"]
             new_image = mimage.MandelImage(min_x,min_y,max_x,max_y,num_dots,num_dots,num_bits,template["high_precision"])
@@ -497,13 +490,13 @@ class MainWindow(QMainWindow):
                 img_value = int(((y+1)*100) / num_dots)
                 self.updateImgProgressBar(img_value)
             all_images.append(new_image)
-            if verbose:
+            if args.verbose:
                 print("Interactive Gened image:",(inum+1))    
             bg_value = int(((inum+1)*100) /  template["num_images"])
             self.updateBgProgressBar(bg_value)
         ofileName, _ = QFileDialog.getSaveFileName(self, "Save C:", "mbg8.bmp", "Images (*.bmp)")
         genBackgroundFile(self.desktop_helper,pixels_per_unit,xpad,ypad,ofileName)
-        msg_txt = "The Background Image was Gernated.\nFile location:%s" % (ofileName)
+        msg_txt = "The Background Image was Generated.\nFile location:%s" % (ofileName)
         dlg = FlexDialog("Success",msg_txt)
         dlg.exec()
         exit(0)
@@ -531,16 +524,14 @@ def genImages(pixels_per_unit):
         new_image = mimage.MandelImage(min_x,min_y,max_x,max_y,num_dots,num_dots,num_bits,template["high_precision"])
         new_image.CalcColorAll()
         all_images.append(new_image)
-        #if args.verbose:
-        #    print("Gened image:",inum+1)
+        if args.verbose:
+            print("Generated image:",inum+1)
 
-def genBackgroundFile(desktop_helper,pixels_per_unit,padx,pady,ofileName):
+def genBackgroundFile(width,height,pixels_per_unit,padx,pady,ofileName):
     width = desktop_helper.GetXSize()
     height = desktop_helper.GetYSize()
     bgImage = bmp.BmpFile( width, height) 
     for inum in range(0,template["num_images"]):
-        if verbose:
-            print(all_images[inum])
         bgImage.ColorImage(
                 template["images"][inum]["bg_x"]*pixels_per_unit+padx, # start x
                 template["images"][inum]["bg_y"]*pixels_per_unit+pady, # start y
@@ -549,17 +540,19 @@ def genBackgroundFile(desktop_helper,pixels_per_unit,padx,pady,ofileName):
                 template["bits_per_color"], # bits_per_color
                 template["brightness_shift"], # bright_shift
                 all_images[inum])
-        if verbose:
-            print("Moved image to Background. Image:",(inum+1))
+        if args.verbose:
+            print("Moved image to background. Image:",(inum+1))
             print( template["images"][inum]["bg_x"]*pixels_per_unit+padx)
             print(template["images"][inum]["bg_y"]*pixels_per_unit+pady) 
             print(pixels_per_unit * template["images"][inum]["side_size"])
     bgImage.Save(ofileName)
 
-def genBackground(desktop_helper):
+def genBackground(desktop_helper,ofileName):
+    width = desktop_helper.GetXSize()
+    height = desktop_helper.GetYSize()
     (pixels_per_unit,padx,pady) = desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
     genImages(pixels_per_unit)            
-    genBackgroundFile(desktop_helper,pixels_per_unit,padx,pady)
+    genBackgroundFile(width,height,pixels_per_unit,padx,pady,ofileName)
 
 #
 # mbg Start
@@ -567,80 +560,77 @@ def genBackground(desktop_helper):
 
 all_images = []
 
-#snap_env = os.environment.get('SNAP')
-
 # CLI Parser
-#parser = argparse.ArgumentParser(description='Mandelbrot Background')
-#parser.add_argument("--ifile", help="Template file (.hjson)", default="~/eight.json")
-#parser.add_argument("--ofile", help="Output file (.bmp)", default="images/bg.bmp")
-#parser.add_argument("--ozfile", help="Output Zoom path file (.hjson)", default="")
-#parser.add_argument("-v", "--verbose", help="Increase output verbosity",action ="store_true") 
-#parser.add_argument("--nogui", help="No Graphical User Interface",action ="store_true") 
-#parser.add_argument("--izfile", help="NoGUI: Input Zoom path file (.hjson)", default="")
-#parser.add_argument("--display", help="NoGUI: Display Size File (.hjson)",default="display/sz1920x1080.json") 
-#parser.add_argument('-V', '--version', action='version', version="%(prog)s ("+__version__+")")
-#args = parser.parse_args()
-ofile = "mbg8.bmp"
-verbose = False 
+parser = argparse.ArgumentParser(description='Mandelbrot Background')
+parser.add_argument("--ifile", help="Template file (.hjson)", default="/snap/mandelbrot-background/current/templates/eight.json")
+parser.add_argument("--ofile", help="Output file (.bmp)", default="mbg8.bmp")
+parser.add_argument("--ozfile", help="Output Zoom path file (.hjson)", default="")
+parser.add_argument("-v", "--verbose", help="Increase output verbosity",action ="store_true") 
+parser.add_argument("--nogui", help="No Graphical User Interface",action ="store_true") 
+parser.add_argument("--izfile", help="NoGUI: Input Zoom path file (.hjson)", default="")
+parser.add_argument("--display", help="NoGUI: Display Size File (.hjson)",default="/snap/mandelbrot-background/current/display/sz1920x1080.json") 
+parser.add_argument('-V', '--version', action='version', version="%(prog)s ("+__version__+")")
+args = parser.parse_args()
+
 # Template File Read 
-template={}
-template["num_images"] = 8
-template["rgb"] =  "bgr"
-template["bits_per_color"]=  4
-template["brightness_shift"]=  4
-template["x_units"]= 16
-template["y_units"]=  8
-template["high_precision"] = False
-template["images"] = []
-one_image0 = {} 
-one_image1 = {} 
-one_image2 = {} 
-one_image3 = {} 
-one_image4 = {} 
-one_image5 = {} 
-one_image6 = {} 
-one_image7 = {} 
-#0
-one_image0["side_size"] = 2
-one_image0["bg_x"] = 0
-one_image0["bg_y"] = 6
-template["images"].append(one_image0)
-#1
-one_image1["side_size"] = 2
-one_image1["bg_x"] = 2
-one_image1["bg_y"] = 6
-template["images"].append(one_image1)
-#2
-one_image2["side_size"] = 2
-one_image2["bg_x"] = 0
-one_image2["bg_y"] = 4
-template["images"].append(one_image2)
-#3
-one_image3["side_size"] = 2
-one_image3["bg_x"] = 2
-one_image3["bg_y"] = 4
-template["images"].append(one_image3)
-#4
-one_image4["side_size"] = 4
-one_image4["bg_x"] = 4
-one_image4["bg_y"] = 4
-template["images"].append(one_image4)
-#5
-one_image5["side_size"] = 4
-one_image5["bg_x"] = 0
-one_image5["bg_y"] = 0
-template["images"].append(one_image5)
-#6
-one_image6["side_size"] = 4
-one_image6["bg_x"] = 4
-one_image6["bg_y"] = 0
-template["images"].append(one_image6)
-#7
-one_image7["side_size"] = 8
-one_image7["bg_x"] = 8
-one_image7["bg_y"] = 0
-template["images"].append(one_image7)
-app = QApplication(sys.argv)
-w = MainWindow()
-w.show()
-app.exec()
+is_real_template = os.path.isfile(args.ifile)
+if(is_real_template):
+    if args.verbose:
+        print("Opening:",args.ifile)
+    template = hjson.load(open(args.ifile))
+else:
+    err_line = "Error: Template File (%s) not found" % args.ifile
+    print(err_line)
+    exit(1)
+# Zoom File Read
+if(args.nogui):
+    is_real_zoom = os.path.isfile(args.izfile)
+    if is_real_zoom:
+        if args.verbose:
+            print("Opening:",args.izfile)
+        zoom = hjson.load(open(args.izfile))
+        if(len(zoom["min_x"]) != template["num_images"]):
+            err_line = "Error: Zoom File does not work with template %d %d" % (len(zoom["min_x"]),template["num_images"])
+            print(err_line)
+            exit(1)
+    else:
+        err_line = "Error: Zoom could not be loaded"
+        print(err_line)
+        exit(1)
+else:
+    if(args.izfile != ""):
+        err_line = "Error: Zoom input file only works when --nogui is enabled"
+        print(err_line)
+        exit(1)
+# Desktop Helper
+desktop_helper = desktop.Desktop()
+# Display File 
+if(args.nogui):
+    is_real_display = os.path.isfile(args.display)
+    if is_real_display:
+        if args.verbose:
+            print("Opening:",args.display)
+        display = hjson.load(open(args.display))
+        desktop_helper.SetDefaultWidthHeight(display["width"],display["height"])
+    else:
+        err_line = "Error: Zoom could not be loaded"
+        print(err_line)
+        exit(1)
+else:
+    if(args.display != "/snap/mandelbrot-background/current/display/sz1920x1080.json"):
+        err_line = "Error: Display input file only works when --nogui is enabled"
+        print(err_line)
+        exit(1)
+# Gui or Not
+if(args.nogui):
+    if(is_real_zoom == False):
+        err_line = "Error: Zoom File (%s) not found" % args.izfile
+        print(err_line)
+        exit(1)
+    else:
+        genBackground(desktop_helper,args.ofile)
+else:
+    app = QApplication(sys.argv)
+    w = MainWindow()
+    w.show()
+    app.exec()

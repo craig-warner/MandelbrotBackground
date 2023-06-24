@@ -6,3 +6,10 @@
     * Added Desktop Sizes
     * Added Zoom In/Out
     * Fixed Bugs
+### Version 1.0.0
+    * PyQt5
+### Version 1.4.0
+    * Made to work with Snap
+### Version 1.5.0
+    * Added CLI
+    * Added Template Control
