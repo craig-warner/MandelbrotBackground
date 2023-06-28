@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import (
     QDialog, QDialogButtonBox, QFileDialog, QWidget, QProgressBar
 )
 from PyQt5.QtCore import ( 
-    Qt, QRect
+    Qt, QRect, QObject, QThread, pyqtSignal
 )
 from PyQt5.QtGui import ( 
     QPainter, QColor, QFont
@@ -49,6 +49,67 @@ from version import __version__
 import mimage as mimage
 import bmp as bmp
 import desktop as desktop
+
+
+# Worker class for calculating an image
+class Worker(QObject):
+    finished = pyqtSignal()
+    progress = pyqtSignal(int)
+
+    def Setup(self,num_bits,pixels_per_unit,xpad,ypad,num_images):
+        self.image_def_min_x = []
+        self.image_def_min_y = []
+        self.image_def_max_x = []
+        self.image_def_max_y = []
+        self.image_def_num_dots = []
+        self.image_def_num_bits = []
+        self.all_images= []
+        self.num_bits = num_bits
+        self.pixels_per_unit = pixels_per_unit
+        self.xpad =  xpad
+        self.ypad = ypad
+        self.num_images  = num_images
+
+    def SetupImage(self,min_x,min_y,max_x,max_y,num_dots,num_bits):
+        self.image_def_min_x.append(min_x)
+        self.image_def_min_y.append(min_y)
+        self.image_def_max_x.append(max_x)
+        self.image_def_max_y.append(max_y)
+        self.image_def_num_dots.append(num_dots)
+        self.image_def_num_bits.append(num_bits)
+
+    def run(self):
+        """ Color Images task."""
+        print("Thread Run:",self.num_images)
+        self.bg_value = 0
+        for i in range(0,self.num_images): 
+            self.new_image = mimage.MandelImage(
+                self.image_def_min_x[i],
+                self.image_def_min_y[i],
+                self.image_def_max_x[i],
+                self.image_def_max_y[i],
+                self.image_def_num_dots[i],
+                self.image_def_num_dots[i],
+                self.image_def_num_bits[i],
+                template["high_precision"])
+            self.img_value = 0
+            for y in range(0,self.image_def_num_dots[i]): 
+                self.new_image.CalcColorOneLine(y)
+                self.img_value = int(((y+1)*100) / self.image_def_num_dots[i])
+                self.progress.emit(self.img_value)
+                #print("One Y Line Calced:",y)
+            self.bg_value = int(((i+1)*100) /  self.num_images)
+            self.all_images.append(self.new_image)
+        self.finished.emit()
+
+    def GetProgressValueBg(self):
+        return(self.bg_value)
+
+    def GetProgressValueImg(self):
+        return(self.img_value)
+
+    def GetImage(self,i):
+        return(self.all_images[i])
 
 class PositionerWidget(QWidget):
     def __init__(self,parent):
@@ -246,8 +307,8 @@ class MainWindow(QMainWindow):
     def createActions(self):
         self.loadTemplateAction= QAction()
         self.loadTemplateAction.setText("Load Template")
-        self.loadZoomAction= QAction()
-        self.loadZoomAction.setText("Load Zoom File")
+        #self.loadZoomAction= QAction()
+        #self.loadZoomAction.setText("Load Zoom File")
         self.generateBackgroundAction= QAction()
         self.generateBackgroundAction.setText("Generate Background")
         self.exitAppAction= QAction()
@@ -261,7 +322,7 @@ class MainWindow(QMainWindow):
         menu = self.menuBar()
         file_menu = menu.addMenu("&File")
         file_menu.addAction(self.loadTemplateAction)
-        file_menu.addAction(self.loadZoomAction)
+        #file_menu.addAction(self.loadZoomAction)
         file_menu.addAction(self.generateBackgroundAction)
         file_menu.addSeparator()
         file_menu.addAction(self.exitAppAction)
@@ -270,7 +331,7 @@ class MainWindow(QMainWindow):
         help_menu.addAction(self.aboutAction)
 
         self.loadTemplateAction.triggered.connect(self.doLoadTemplate)
-        self.loadZoomAction.triggered.connect(self.doLoadZoom)
+        #self.loadZoomAction.triggered.connect(self.doLoadZoom)
         self.generateBackgroundAction.triggered.connect(self.doDrawButton)
         self.exitAppAction.triggered.connect(self.doExitApp)
         self.aboutAction.triggered.connect(self.doAbout)
@@ -448,7 +509,6 @@ class MainWindow(QMainWindow):
         self.bg_progress_bar.setValue(value)
 
     def updateImgProgressBar(self,value):
-        time.sleep(0.1)
         self.img_progress_bar.setValue(value)
 
     def updateAfterZoomSelect(self):
@@ -472,40 +532,74 @@ class MainWindow(QMainWindow):
             if (self.positionerWidget.getPoints() == template["num_images"]):
                 self.positionerWidget.writeZoomPathFile()
 
-    #def genImagesInteractive(self):
-    #    worker = Worker(self.genImagesInteractiveThread) 
-    #    self.threadpool.start(worker)
-    #def genImagesInteractiveThread(self):
     def genImagesInteractive(self):
-        num_bits = template["bits_per_color"]
-        (pixels_per_unit,xpad,ypad) = self.desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
-        for inum in range(0,template["num_images"]):
-            (min_x, max_x , min_y , max_y) = self.positionerWidget.getZoomPath(inum)
-            if args.verbose:
-                print ( "min_x:",min_x, "max_x:",max_x, "min_y:",min_y, "max_y:",max_y)
-            num_dots = pixels_per_unit * template["images"][inum]["side_size"]
-            new_image = mimage.MandelImage(min_x,min_y,max_x,max_y,num_dots,num_dots,num_bits,template["high_precision"])
-            for y in range(0,num_dots): 
-                new_image.CalcColorOneLine(y)
-                img_value = int(((y+1)*100) / num_dots)
-                self.updateImgProgressBar(img_value)
-            all_images.append(new_image)
-            if args.verbose:
-                print("Interactive Gened image:",(inum+1))    
-            bg_value = int(((inum+1)*100) /  template["num_images"])
-            self.updateBgProgressBar(bg_value)
+        # Set up Constants
+        self.num_bits = template["bits_per_color"]
+        (self.pixels_per_unit,self.xpad,self.ypad) = self.desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
+        self.inum = 0
+        # Span Threads
+        self.genImagesWithThread()
+
+    def FinishAll(self):
         ofileName, _ = QFileDialog.getSaveFileName(self, "Save C:", "mbg8.bmp", "Images (*.bmp)")
-        genBackgroundFile(self.desktop_helper,pixels_per_unit,xpad,ypad,ofileName)
+        genBackgroundFile(self.desktop_helper,self.pixels_per_unit,self.xpad,self.ypad,ofileName)
         msg_txt = "The Background Image was Generated.\nFile location:%s" % (ofileName)
         dlg = FlexDialog("Success",msg_txt)
         dlg.exec()
         exit(0)
 
+    def genImagesWithThread(self):
+        # Create a QThread object
+        self.thread = QThread()
+        # Create a worker object
+        self.worker = Worker()
+        # Move worker to the thread
+        self.worker.moveToThread(self.thread)
+        # Pass Arguments to Worker
+        self.worker.Setup(self.num_bits,self.pixels_per_unit,self.xpad,self.ypad,template["num_images"])
+        self.inum = 0
+        # Pass Arguments to Worker
+        for inum in range(0,template["num_images"]):
+            (min_x, max_x , min_y , max_y) = self.positionerWidget.getZoomPath(inum)
+            num_dots = self.pixels_per_unit * template["images"][inum]["side_size"]
+            if args.verbose:
+                print ( "min_x:",min_x, "max_x:",max_x, "min_y:",min_y, "max_y:",max_y)
+            self.worker.SetupImage(min_x,min_y,max_x,max_y,num_dots,self.num_bits)
+        # Connect signals and slots
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(self.grabImages)
+        self.worker.progress.connect(self.reportProgressImageColor)
+        # Start the thread
+        self.thread.start()
+        if args.verbose:
+            print("Thread Started")
+        # Final resets
+        #self.thread.finished.connect(
+            #lambda: self.longRunningBtn.setEnabled(True)
+        #)
+    def grabImages(self):
+        for inum in range(0,template["num_images"]):
+            if args.verbose:
+                print("Grab Image:", inum)
+            new_image = self.worker.GetImage(inum)
+            all_images.append(new_image)
+        self.FinishAll()
+
+    def reportProgressImageColor(self):
+        img_value = self.worker.GetProgressValueImg()
+        bg_value = self.worker.GetProgressValueBg()
+        if args.verbose:
+            print("Report BG Progress:",bg_value)
+            print("Report Img Progress:",img_value)
+        self.updateBgProgressBar(bg_value)
+        self.updateImgProgressBar(img_value)
 
     def genZoomCountText(self):
         text  = "Zoom Path Points Defined: %d (out of %d)" % (self.positionerWidget.getPoints(), (template["num_images"]))
-        return text
-
+        return text    
 
 #
 # mbg Helper Functions 
@@ -527,7 +621,7 @@ def genImages(pixels_per_unit):
         if args.verbose:
             print("Generated image:",inum+1)
 
-def genBackgroundFile(width,height,pixels_per_unit,padx,pady,ofileName):
+def genBackgroundFile(desktop_helper,pixels_per_unit,padx,pady,ofileName):
     width = desktop_helper.GetXSize()
     height = desktop_helper.GetYSize()
     bgImage = bmp.BmpFile( width, height) 

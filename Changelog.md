@@ -13,3 +13,5 @@
 ### Version 1.5.0
     * Added CLI
     * Added Template Control
+### Version 1.6.0
+    * Fixed GUI stalling by adding Threading
