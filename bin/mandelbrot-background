@@ -5,9 +5,9 @@
 Mandelbrot Background
 author: Craig Warner
     This program generates a desktop background composed of several
-Mandlebrot images.  The images are a sequence of images start with a
-standard Mandelbortt images, then setep by step magnify the and focus
-in on one location in the Mandelbrt space.     
+Mandlebrot images.  The sequence of images start with a
+standard Mandelbort images, then step by step magnify and focus
+in on one location in the Mandelbrot space.     
 """
 
 # External Imports
@@ -49,6 +49,7 @@ from version import __version__
 import mimage as mimage
 import bmp as bmp
 import desktop as desktop
+from tplate import (Tplate)
 
 
 # Worker class for calculating an image
@@ -290,6 +291,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         # Start the GUI 
         self.desktop_helper = desktop.Desktop()
+        self.template_helper = Tplate()
         self.initUI()
         #self.threadpool = QThreadpool()
 
@@ -337,14 +339,18 @@ class MainWindow(QMainWindow):
         self.aboutAction.triggered.connect(self.doAbout)
 
     def doLoadTemplate(self):
+        global template
         if(args.verbose):
             print("Load Template")
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         self.template_file_name, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","JSON Files (*.json);; HJSON Files (*.hjson)", options=options)
+        template = {} 
         template = hjson.load(open(self.template_file_name))
+        self.doResetButton() 
 
     def doLoadZoom(self):
+        global zoom
         if(args.verbose):
             print("Load Zoom")
         options = QFileDialog.Options()
@@ -393,11 +399,23 @@ class MainWindow(QMainWindow):
         vbox2_widget.setFixedWidth(200)
 
         template_label  =  QtWidgets.QLabel()
-        template_label_text = "Template File: %s" % (args.ifile)
-        #template_label_text = "Template 8 images"
+        #template_label_text = "Template File: %s" % (args.ifile)
+        template_label_text = "Select a background template"
         template_label.setText(template_label_text)
         template_label.setFont(QFont('SansSerif', 10))
         vbox3.addWidget(template_label)
+        self.template_list_widget =  QListWidget(self)
+        all_templates= self.template_helper.GetAllTemplates()
+        all_template_items = []
+        for t in all_templates:
+            all_template_items.append(QListWidgetItem(t))    
+        for di in all_template_items:
+            self.template_list_widget.addItem(di)
+        self.template_list_widget.setCurrentRow(self.template_helper.GetDefault())
+        vbox3.addWidget(self.template_list_widget)
+        self.template_list_widget.currentItemChanged.connect(self.doTemplateListChange)
+
+        slider_title= QtWidgets.QLabel()
 
         desktop_size_label  =  QtWidgets.QLabel()
         desktop_size_label_text = "Select your desktop size"
@@ -476,6 +494,17 @@ class MainWindow(QMainWindow):
 
         self.wid.setLayout(vbox1)
 
+    def doTemplateListChange(self):
+        global template
+        template_num = self.template_list_widget.currentRow()
+        filename = self.template_helper.GetFilename(template_num)
+        self.template_file_name = "/snap/mandelbrot-background/current/templates/" + \
+            filename
+        template = {}
+        template = hjson.load(open(self.template_file_name))
+        print (template)
+        self.doResetButton()
+
     def doZoomInChanged(self):
         if args.verbose:
             print("ZoomIn Change")
@@ -491,6 +520,8 @@ class MainWindow(QMainWindow):
             print("Reset Button")
         self.positionerWidget.reset()
         self.updateAfterZoomSelect()
+        zoom_path_cnt_text = self.genZoomCountText()
+        self.zoom_path_cnt.setText(zoom_path_cnt_text)
 
     def doDrawButton(self):
         # Get DesktopSize
@@ -598,6 +629,8 @@ class MainWindow(QMainWindow):
         self.updateImgProgressBar(img_value)
 
     def genZoomCountText(self):
+        if(args.verbose):
+            print (template)
         text  = "Zoom Path Points Defined: %d (out of %d)" % (self.positionerWidget.getPoints(), (template["num_images"]))
         return text    
 

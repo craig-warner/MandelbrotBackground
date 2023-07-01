@@ -131,7 +131,7 @@ class MandelImage:
         elif numBits == 12:
             str = "#%09x" & (i&0xfffffffff)
         else:
-            print ("Error 1")
+            print ("Error:numBits",numBits)
             raise Exception("Not a Valid Color Width")
         return str
     def GetDot(self,index):

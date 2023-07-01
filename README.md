@@ -1,9 +1,8 @@
 # Mandelbrot Background Drawer
 
-Mandelbrot-background generates custom Descktop backgrounds for you personal computer.  The backgrounds
+Mandelbrot-background generates custom Desktop backgrounds for you personal computer.  The backgrounds
 are made up of Mandelbrot fractal images of different sizes and different positions in the real number, complex
-number coordinate system.   By selecting the Mandelbrot image locations you want to me part of your desktop
-background, you can make wallpaper that looks like this.
+number coordinate system.   By selecting the Mandelbrot image locations you can personalize your wallpaper. Below is an example background image.
 
 <img src="snap/gui/sz1920x1080.png">
 

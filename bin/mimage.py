@@ -121,7 +121,9 @@ class MandelImage:
         di = self.MaxDi - self.DiperDot*float(yDot)
         return di
     def Inter2Color(self,numBits,i):
-        if numBits == 4:
+        if numBits == 3:
+            str = "#%03x" % (i&0x1ff)
+        elif numBits == 4:
             str = "#%03x" % (i&0xfff)
         elif numBits == 5:
             str = "#%04x" % (i&0x7fff)

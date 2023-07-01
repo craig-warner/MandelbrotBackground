@@ -28,6 +28,6 @@ setuptools.setup(
             "bin/desktop.py",
             "bin/mimage.py",
             "bin/version.py",
-            "bin/eight.json"
+            "bin/tplate.py"
             ],
 )
