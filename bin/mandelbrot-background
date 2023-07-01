@@ -298,8 +298,8 @@ class MainWindow(QMainWindow):
     def initUI(self):
         self.wid = QtWidgets.QWidget(self)
         self.setCentralWidget(self.wid)
-        self.setGeometry(100,100,512,384)
-        self.setFixedSize(512,384)
+        self.setGeometry(100,100,640,480)
+        self.setFixedSize(640,480)
         self.setWindowTitle("Mandelbrot Background")
         self.createActions()
         self.addMenuToWindow()
@@ -502,7 +502,8 @@ class MainWindow(QMainWindow):
             filename
         template = {}
         template = hjson.load(open(self.template_file_name))
-        print (template)
+        #Debug
+        #print (template)
         self.doResetButton()
 
     def doZoomInChanged(self):
@@ -629,8 +630,9 @@ class MainWindow(QMainWindow):
         self.updateImgProgressBar(img_value)
 
     def genZoomCountText(self):
-        if(args.verbose):
-            print (template)
+        # Debug
+        #if(args.verbose):
+        #    print (template)
         text  = "Zoom Path Points Defined: %d (out of %d)" % (self.positionerWidget.getPoints(), (template["num_images"]))
         return text    
 
