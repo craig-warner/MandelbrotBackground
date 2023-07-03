@@ -164,49 +164,50 @@ class PositionerWidget(QWidget):
         painter.fillRect(x , y , width, height, color)
 
     def mousePressEvent(self,event):
+        #self.point_set_x = event.pos().x() - 100
+        #self.point_set_y = event.pos().y() - 100
+        self.point_set_x = event.pos().x()
+        self.point_set_y = event.pos().y()
+        if(args.verbose):
+            print("x: %d y: %d " % (event.pos().x(),event.pos().y()))
+            print("minx: %f miny: %f " % (self.min_real_x,self.min_real_y))
+            print("maxx: %f maxy: %f " % (self.max_real_x,self.max_real_y))
+        center_x = (self.min_real_x + float(self.point_set_x)/200.0 * self.real_length)
+        center_y  = (self.max_real_y - float(self.point_set_y)/200.0 * self.real_length)
+        if(args.verbose):
+            print("crx: %f cry: %f " % (center_x,center_y))
+        if(self.zoomIn):
+            self.real_length = self.real_length * self.zoomValue 
+        else:
+            self.real_length = self.real_length / self.zoomValue 
+        self.min_real_x = center_x - self.real_length/float(2)
+        self.max_real_x = center_x + self.real_length/float(2)
+        self.min_real_y = center_y - self.real_length/float(2)
+        self.max_real_y = center_y + self.real_length/float(2)
+        self.image.RePosition(
+                self.min_real_x,
+                self.min_real_y,
+                self.max_real_x,
+                self.max_real_y
+                )
+        self.repaint()
+        #self.appendPoint(self.min_real_x,self.max_real_x,self.min_real_y,self.max_real_y)
+        #self.parent.updateAfterZoomSelect()
+        
+    def appendPoint(self):
         if not self.pathAllDefined:
-            #self.point_set_x = event.pos().x() - 100
-            #self.point_set_y = event.pos().y() - 100
-            self.point_set_x = event.pos().x()
-            self.point_set_y = event.pos().y()
-            if(args.verbose):
-                print("x: %d y: %d " % (event.pos().x(),event.pos().y()))
-                print("minx: %f miny: %f " % (self.min_real_x,self.min_real_y))
-                print("maxx: %f maxy: %f " % (self.max_real_x,self.max_real_y))
-            center_x = (self.min_real_x + float(self.point_set_x)/200.0 * self.real_length)
-            center_y  = (self.max_real_y - float(self.point_set_y)/200.0 * self.real_length)
-            if(args.verbose):
-                print("crx: %f cry: %f " % (center_x,center_y))
-            if(self.zoomIn):
-                self.real_length = self.real_length * self.zoomValue 
-            else:
-                self.real_length = self.real_length / self.zoomValue 
-            self.min_real_x = center_x - self.real_length/float(2)
-            self.max_real_x = center_x + self.real_length/float(2)
-            self.min_real_y = center_y - self.real_length/float(2)
-            self.max_real_y = center_y + self.real_length/float(2)
-            self.image.RePosition(
-                    self.min_real_x,
-                    self.min_real_y,
-                    self.max_real_x,
-                    self.max_real_y
-                    )
-            self.repaint()
-            self.appendPoint(self.min_real_x,self.max_real_x,self.min_real_y,self.max_real_y)
+            self.zoomPath["min_x"].append(self.min_real_x)
+            self.zoomPath["max_x"].append(self.max_real_x)
+            self.zoomPath["min_y"].append(self.min_real_y)
+            self.zoomPath["max_y"].append(self.max_real_y)
+            self.pointsDefined = self.pointsDefined + 1 
             self.parent.updateAfterZoomSelect()
+            if(self.pointsDefined == template["num_images"]):
+                self.pathAllDefined = True 
+            else:
+                self.pathAllDefined = False 
         else:
             self.parent.tellUserTooManyZooms()
-        
-    def appendPoint(self,min_x,max_x,min_y,max_y):
-        self.zoomPath["min_x"].append(min_x)
-        self.zoomPath["max_x"].append(max_x)
-        self.zoomPath["min_y"].append(min_y)
-        self.zoomPath["max_y"].append(max_y)
-        self.pointsDefined = self.pointsDefined + 1 
-        if(self.pointsDefined == template["num_images"]):
-            self.pathAllDefined = True 
-        else:
-            self.pathAllDefined = False 
 
     def init_settings(self):
         self.pathAllDefined = False
@@ -216,13 +217,14 @@ class PositionerWidget(QWidget):
         self.zoomPath["max_x"] = []
         self.zoomPath["min_y"] = []
         self.zoomPath["max_y"] = []
-        self.appendPoint(-1.0,2.0,-1.5,1.5)
+        #self.appendPoint(-1.0,2.0,-1.5,1.5)
 
         self.min_real_x = float('-1.0')
         self.max_real_x = float('2.0')
         self.min_real_y = float('-1.5')
         self.max_real_y = float('1.5')
         self.real_length = float('3.0')
+
 
     def reset(self):
         self.init_settings()
@@ -388,6 +390,7 @@ class MainWindow(QMainWindow):
 
         hbox1 = QtWidgets.QHBoxLayout()
         hbox2 = QtWidgets.QHBoxLayout()
+        hbox2_1 = QtWidgets.QHBoxLayout()
         hbox3 = QtWidgets.QHBoxLayout()
         hbox4 = QtWidgets.QHBoxLayout()
 
@@ -451,10 +454,16 @@ class MainWindow(QMainWindow):
         hbox2.addWidget(self.zoomin_check_box)
         vbox3.addLayout(hbox2)
 
+        add_image_button = QtWidgets.QPushButton('Add Image', self)
+        add_image_button.setCheckable(True)
+        add_image_button.clicked[bool].connect(self.doAddImage)
+        hbox2_1.addWidget(add_image_button)
+
         reset_button = QtWidgets.QPushButton('Reset Zoom Path', self)
         reset_button.setCheckable(True)
         reset_button.clicked[bool].connect(self.doResetButton)
-        vbox3.addWidget(reset_button)
+        hbox2_1.addWidget(reset_button)
+        vbox3.addLayout(hbox2_1)
 
         self.zoom_path_cnt = QtWidgets.QLabel()
         zoom_path_cnt_text = self.genZoomCountText()
@@ -515,6 +524,9 @@ class MainWindow(QMainWindow):
         value = self.slider.value()
         zoomValue =  (float(0.05) * (21-value))
         self.positionerWidget.setZoom(zoomValue)
+
+    def doAddImage(self):
+        self.positionerWidget.appendPoint()
 
     def doResetButton(self):
         if args.verbose:
