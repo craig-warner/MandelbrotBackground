@@ -745,15 +745,15 @@ def genBackground(desktop_helper,ofileName,selectedColor):
 # mbg Start
 #
 
-topPath = "/home/craigwarner/u64share/Programming/mbg_v1/MandelbrotBackground/"
-#topPath = "/snap/mandelbrot-background/current/"
+#topPath = "/home/craigwarner/u64share/Programming/mbg_v1/MandelbrotBackground/"
+topPath = "/snap/mandelbrot-background/current/"
 
 all_images = []
 
 # CLI Parser
 parser = argparse.ArgumentParser(description='Mandelbrot Background')
-#parser.add_argument("--ifile", help="Template file (.hjson)", default="/snap/mandelbrot-background/current/templates/eight.json")
-parser.add_argument("--ifile", help="Template file (.hjson)", default="/home/craigwarner/u64share/Programming/mbg_v1/MandelbrotBackground/templates/v2/eight.hjson")
+parser.add_argument("--ifile", help="Template file (.hjson)", default="/snap/mandelbrot-background/current/templates/eight.json")
+#parser.add_argument("--ifile", help="Template file (.hjson)", default="/home/craigwarner/u64share/Programming/mbg_v1/MandelbrotBackground/templates/v2/eight.hjson")
 parser.add_argument("--ofile", help="Output file (.bmp)", default="mbg8.bmp")
 parser.add_argument("--ozfile", help="Output Zoom path file (.hjson)", default="")
 parser.add_argument("-v", "--verbose", help="Increase output verbosity",action ="store_true") 
