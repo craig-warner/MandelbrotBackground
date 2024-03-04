@@ -1,11 +1,11 @@
 name: mandelbrot-background
-version: '1.8'
+version: '1.9'
 summary: Mandelbrot Background Drawing App
 description: |
   Create your own Mandelbrot desktop backgrounds
 confinement: strict 
 #confinement: devmode 
-base: core18
+base: core20
 grade: stable
 icon: snap/gui/mandelbrot-background.png
 
@@ -68,6 +68,14 @@ parts:
     source: display 
     organize: 
       '*': display/
+
+  colors:
+    after: [mainapp]
+    plugin: dump 
+    source: colors 
+    organize: 
+      '*': colors/
+
 
 #  mandelbrot-background:
 #    after: [mainapp]

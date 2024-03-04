@@ -26,5 +26,13 @@ options:
   -V, --version      show program's version number and exit
 ```
 
+## Snap Build Steps
+
+<pre>
+1) Test locally
+1) %snapcraft
+2) %snapcraft install
+</pre>
+
 
 

@@ -1,0 +1,80 @@
+{
+  "version": "2.0",
+  "num_images": 14,
+  "x_units": 32,
+  "y_units": 16,
+  "high_precision": false,
+  "save_filename": "mbg_14.bmp",
+  "images": [
+      {
+        "side_size": 1,
+        "bg_x": 31,
+        "bg_y": 15 
+      },
+      {
+        "side_size": 1,
+        "bg_x": 30,
+        "bg_y": 15 
+      },
+      {
+        "side_size": 1,
+        "bg_x": 30,
+        "bg_y": 14 
+      },
+      {
+        "side_size": 1,
+        "bg_x": 31,
+        "bg_y": 14 
+      },
+      {
+        "side_size": 2,
+        "bg_x": 28,
+        "bg_y": 14 
+      },
+      {
+        "side_size": 2,
+        "bg_x": 28,
+        "bg_y": 12 
+      },
+      {
+        "side_size": 2,
+        "bg_x": 30,
+        "bg_y": 12 
+      },
+      {
+        "side_size": 4,
+        "bg_x": 24,
+        "bg_y": 12 
+      },
+      {
+        "side_size": 4,
+        "bg_x": 24,
+        "bg_y": 8 
+      },
+      {
+        "side_size": 4,
+        "bg_x": 28,
+        "bg_y": 8 
+      },
+      {
+        "side_size": 8,
+        "bg_x": 16,
+        "bg_y": 8 
+      },
+      {
+        "side_size": 8,
+        "bg_x": 16,
+        "bg_y": 0
+      },
+      {
+        "side_size": 8,
+        "bg_x": 24,
+        "bg_y": 0
+      },
+      {
+        "side_size": 16,
+        "bg_x": 0,
+        "bg_y": 0 
+      }
+  ]
+}
