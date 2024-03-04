@@ -37,7 +37,7 @@ parts:
   mainapp:
     after: [desktop-qt5]
     plugin: python
-    python-version: python3
+#    python-version: python3
     source-type: local 
 #    source: [ 'bin', 'display', 'mbg', 'templates', 'zoom', 'mbg.py'] 
     source: . 
