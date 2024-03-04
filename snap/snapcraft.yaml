@@ -46,7 +46,7 @@ parts:
     stage-packages:
     - python-six
     - python3-pyqt5
-    - python-json-tricks
+#    - python-json-tricks
    
   templates:
     after: [mainapp]
@@ -89,7 +89,8 @@ parts:
 
 apps:
   mandelbrot-background:
-    command: desktop-launch $SNAP/bin/mandelbrot-background
+#    command: desktop-launch $SNAP/bin/mandelbrot-background
+    command: bin/mandelbrot-background
     environment:
       DISABLE_WAYLAND: 1
     plugs: ['desktop', 'framebuffer', 'camera', 'network', 'home', 'opengl', 'x11','desktop-legacy']
