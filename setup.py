@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mandelbrot-background", #
-    version="1.0.0",
+    version="1.9.0",
     author="Craig Warner",
     author_email="cgwarner2014@gmail.com",
     description="Mandelbrot Background",
@@ -26,6 +26,7 @@ setuptools.setup(
     scripts=['bin/mandelbrot-background',
             "bin/bmp.py",
             "bin/desktop.py",
+            "bin/colors.py",
             "bin/mimage.py",
             "bin/version.py",
             "bin/tplate.py"

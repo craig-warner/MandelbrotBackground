@@ -1,22 +1,33 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+"""
+Mandelbrot Background : Mandelbrot Image
+"""
+
 from decimal import *
+import colors as colors
 
 class MandelImage:
     # MinX,MinY,MaxX,MaxY = String containing floating point numbers defining the Madlbrot image
     # XDots,YDots = Integers specifying the width and the height in pixels
     # numBits = Integer specify the number fo color bits per color
-    def __init__ (self,MinX,MinY,MaxX,MaxY,XDots,YDots,numBits,highPrecision):
-        self.numBits = numBits
+    def __init__ (self,MinX,MinY,MaxX,MaxY,XDots,YDots,highPrecision,selectedColor):
         self.XDots=XDots 
         self.YDots=YDots 
         self.highPrecision = highPrecision
         self.SetUpCalc(MinX,MinY,MaxX,MaxY)
         self.Dots = []
+        self.selectedColor = selectedColor
+
+    def SetColor(self,selectedColor):
+        self.selectedColor = selectedColor
 
     def CalcColorDot(self,x,y):
         if(self.highPrecision):
             dot = self.HighPColorDot(x,y)
         else:
             dot = self.LowPColorDot(x,y)
+        #print("DEBUG:Dot:",dot)
         return dot
 
     def CalcColorOneLine(self,y):
@@ -64,20 +75,20 @@ class MandelImage:
         a = self.HighPGetA(x)
         # DEBUG: print("AA:",a)
         di = self.HighPGetDi(y)
-        numIters = 1<<(self.numBits*3)
+        numIters = (1<<self.selectedColor.GetNumBits())
         colorI = self.HighPGetColor(a,di,numIters)
         # DEBUG: print(colorI)
-        colorStr = self.Inter2Color(self.numBits,colorI)
+        colorStr = self.selectedColor.Inter2Color(colorI)
         return(colorStr)
 
     def LowPColorDot(self,x,y):
         a = self.LowPGetA(x)
         # DEBUG: print("AA:",a)
         di = self.LowPGetDi(y)
-        numIters = 1<<(self.numBits*3)
+        numIters = (1<<self.selectedColor.GetNumBits())
         colorI = self.LowPGetColor(a,di,numIters)
         # DEBUG: print(colorI)
-        colorStr = self.Inter2Color(self.numBits,colorI)
+        colorStr = self.selectedColor.Inter2Color(colorI)
         return(colorStr)
 
     def HighPGetColor(self,c,di,numIters):
@@ -120,22 +131,5 @@ class MandelImage:
     def LowPGetDi(self,yDot):
         di = self.MaxDi - self.DiperDot*float(yDot)
         return di
-    def Inter2Color(self,numBits,i):
-        if numBits == 3:
-            str = "#%03x" % (i&0x1ff)
-        elif numBits == 4:
-            str = "#%03x" % (i&0xfff)
-        elif numBits == 5:
-            str = "#%04x" % (i&0x7fff)
-        elif numBits == 6:
-            str = "#%05x" % (i&0x3ffff)
-        elif numBits == 8:
-            str = "#%06x" % (i&0xffffff)
-        elif numBits == 12:
-            str = "#%09x" & (i&0xfffffffff)
-        else:
-            print ("Error 1")
-            raise Exception("Not a Valid Color Width")
-        return str
     def GetDot(self,index):
         return(self.Dots[index])

@@ -13,13 +13,13 @@ class Tplate:
             "Two (2 images)"
         ]
         self.filename= [
-            "center.json",
+            "center.hjson",
             "diagonal.hjson",
             "five.hjson",
             "three_with_comments.hjson",
-            "eight.json",
-            "eleven.json",
-            "fourteen.json",
+            "eight.hjson",
+            "eleven.hjson",
+            "fourteen.hjson",
             "one.hjson",
             "two.hjson"
         ] 
