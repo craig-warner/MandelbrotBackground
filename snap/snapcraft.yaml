@@ -30,7 +30,7 @@ parts:
       - libqt5gui5
       - libgdk-pixbuf2.0-0
       - libqt5svg5
-      - try: [appmenu-qt5] # not available on core18
+#      - appmenu-qt5
       - locales-all
       - xdg-user-dirs
 
@@ -86,11 +86,38 @@ parts:
 #    organize: [ "mbg.py: mbg.py", "bin/__init__.py" "bin/__init__.py 
 #    - bin/bmp.py: bin/__init__.py 
 
+#  hooks:
+#    install:
+#      command-chain:
+#        - snap/command-chain/desktop-launch
+#    post-refresh:
+#      command-chain:
+#        - snap/command-chain/desktop-launch
+
+##  desktop-launch:
+#      plugin: make
+#      source: desktop-launch
+#      build-packages:
+#        - rsync
+#        - libgail-dev
+#        - libgtk-3-dev
+#        - libgtk2.0-dev
+#      stage-packages:
+#        - appmenu-gtk2-module
+#        - gtk2-engines
+#        - gtk2-engines-pixbuf
+#        - libatk-adaptor
+#        - libcanberra-gtk-module
+#        - libgail-common
 
 apps:
   mandelbrot-background:
-#    command: desktop-launch $SNAP/bin/mandelbrot-background
-    command: bin/mandelbrot-background
+    command: bin/desktop-launch bin/mandelbrot-background
+#    desktop: snap/gui/mandelbrot-background.desktop
+#    command-chain: [snap/command-chain/desktop-launch]
+#    command: desktop-launch bin/mandelbrot-background
+#    command-chain:
+#      - bin/desktop-launch
     environment:
       DISABLE_WAYLAND: 1
     plugs: ['desktop', 'framebuffer', 'camera', 'network', 'home', 'opengl', 'x11','desktop-legacy']
