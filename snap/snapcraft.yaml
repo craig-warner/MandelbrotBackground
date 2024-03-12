@@ -1,5 +1,5 @@
 name: mandelbrot-background
-version: '1.9'
+version: '1.10'
 summary: Mandelbrot Background Drawing App
 description: |
   Create your own Mandelbrot desktop backgrounds
@@ -38,6 +38,11 @@ parts:
     after: [desktop-qt5]
     plugin: python
 #    python-version: python3
+    python-packages:
+    - pyqt5
+    - hjson 
+    - argparse
+    - decimal
     source-type: local 
 #    source: [ 'bin', 'display', 'mbg', 'templates', 'zoom', 'mbg.py'] 
     source: . 
