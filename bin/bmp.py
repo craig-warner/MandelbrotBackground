@@ -45,7 +45,8 @@ class Bitmap():
     def setPixel(s, x, y, color):
         if isinstance(color, tuple):
             if x<0 or y<0 or x>s._bcWidth-1 or y>s._bcHeight-1:
-                raise ValueError('Coords out of range')
+                str = "Coords out of range: x = %d, y = %d" % (x,y)
+                raise ValueError(str)
             if len(color) != 3:
                 raise ValueError('Color must be a tuple of 3 elems')
             s._graphics[y*s._bcWidth+x] = (color[2], color[1], color[0])

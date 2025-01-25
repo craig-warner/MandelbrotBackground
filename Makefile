@@ -1,5 +1,5 @@
 init:
-	pip install -r requirements.txt
+	pip install -r requirements.txt --break-system-packages
 
 test:
 #	py.test tests

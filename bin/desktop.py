@@ -89,7 +89,7 @@ class Desktop:
         width = self.GetXSize()
         height = self.GetYSize()
         pixels_per_unit_x = int(width / xunits)
-        pixels_per_unit_y = int(width / yunits) 
+        pixels_per_unit_y = int(height / yunits) 
         if(pixels_per_unit_x < pixels_per_unit_y):
             # use x   
             pixels_per_unit = pixels_per_unit_x

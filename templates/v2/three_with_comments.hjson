@@ -2,13 +2,13 @@
 // The template file specifies the following information about the background
 // - Number of images in the desktop background 
 // - Size and position on each image
-// - Coloring settings  (One color setting per background
+// - Coloring settings  (One color setting per background)
 // - Python Math settings 
 {
     "version": "2.0",       // Template File Format Version Number
     "num_images": 3,        // Number of images in Background 
     // Size Settings
-    "x_units": 3,           // tile units in x-dimension
+    "x_units": 3,           // Tile units in x-dimension
     "y_units": 2,           // Tile units in y-dimension
     // Python math library Settings
     "high_precision": false,    // true implies high precesion math labrary (decimal) is used; 

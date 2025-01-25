@@ -370,10 +370,10 @@ class MainWindow(QMainWindow):
         self.zoom_file_name, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","JSON Files (*.json);; HJSON Files (*.hjson)", options=options)
         zoom = hjson.load(open(self.zoom_file_name))
 
-    def doGenerateBackground(self):
-        if(args.verbose):
-            print("Generating Background")
-        genBackground(self.desktop_helper)
+#   def doGenerateBackground(self):
+#        if(args.verbose):
+#            print("Generating Background")
+#        genBackground(self.desktop_helper,selectedColor,ofileName)
 
     def doExitApp(self):
         exit(0)
@@ -449,6 +449,7 @@ class MainWindow(QMainWindow):
             self.desktop_list_widget.addItem(di)
         self.desktop_list_widget.setCurrentRow(self.desktop_helper.GetDefault())
         vbox3.addWidget(self.desktop_list_widget)
+        self.desktop_list_widget.currentItemChanged.connect(self.doDesktopListChange)
 
         # Color Select 
         color_select_label  =  QtWidgets.QLabel()
@@ -550,6 +551,11 @@ class MainWindow(QMainWindow):
         #print (template)
         self.doResetButton()
 
+    def doDesktopListChange(self):
+        desktop_size_num = self.desktop_list_widget.currentRow()
+        self.desktop_helper.SetDefault(desktop_size_num)
+        self.doResetButton()
+
     def doColorSelectChange(self):
         if args.verbose:
             print("Color Select Change") 
@@ -584,6 +590,8 @@ class MainWindow(QMainWindow):
         # Get DesktopSize
         desktop_size_num = self.desktop_list_widget.currentRow()
         self.desktop_helper.SetDefault(desktop_size_num)
+        if args.verbose:
+            print("Desktop Size:",desktop_size_num)
         if args.verbose:
             print("Draw Button")
         if template["num_images"] != self.positionerWidget.getPoints():
@@ -631,8 +639,8 @@ class MainWindow(QMainWindow):
     def FinishAll(self):
         global template
         ofileName, _ = QFileDialog.getSaveFileName(self, "Save C:", template["save_filename"], "Images (*.bmp)")
-        width = desktop_helper.GetXSize()
-        height = desktop_helper.GetYSize()
+        width = self.desktop_helper.GetXSize()
+        height = self.desktop_helper.GetYSize()
         genBackgroundFile(width,height,self.pixels_per_unit,self.xpad,self.ypad,ofileName)
         msg_txt = "The Background Image was Generated.\nFile location:%s" % (ofileName)
         dlg = FlexDialog("Success",msg_txt)
@@ -720,8 +728,17 @@ def genImages(pixels_per_unit,selectedColor):
 def genBackgroundFile(width,height,pixels_per_unit,padx,pady,ofileName):
 
     #print("Dw:",width,"Dh:",height,"Ppu",pixels_per_unit)
+    if args.verbose:
+        print("W:",width,"H:",height)
     bgImage = bmp.BmpFile( width, height) 
     for inum in range(0,template["num_images"]):
+        if args.verbose:
+            print("Moved image to background. Image:",(inum+1))
+            print( template["images"][inum]["bg_x"]*pixels_per_unit+padx)
+            print(template["images"][inum]["bg_y"]*pixels_per_unit+pady) 
+            print(pixels_per_unit)
+            print(template["images"][inum]["side_size"])
+            print(pixels_per_unit * template["images"][inum]["side_size"])
         bgImage.ColorImage(
                 template["images"][inum]["bg_x"]*pixels_per_unit+padx, # start x
                 template["images"][inum]["bg_y"]*pixels_per_unit+pady, # start y
@@ -737,6 +754,8 @@ def genBackgroundFile(width,height,pixels_per_unit,padx,pady,ofileName):
 def genBackground(desktop_helper,ofileName,selectedColor):
     width = desktop_helper.GetXSize()
     height = desktop_helper.GetYSize()
+    if args.verbose:
+        print("Width:",width,"Height:",height)
     (pixels_per_unit,padx,pady) = desktop_helper.GetPixelsPerUnitAndPads(template["x_units"],template["y_units"])
     genImages(pixels_per_unit,selectedColor)            
     genBackgroundFile(width,height,pixels_per_unit,padx,pady,ofileName)
@@ -745,14 +764,16 @@ def genBackground(desktop_helper,ofileName,selectedColor):
 # mbg Start
 #
 
-#topPath = "/home/craigwarner/u64share/Programming/mbg_v1/MandelbrotBackground/"
 topPath = "/snap/mandelbrot-background/current/"
+#topPath = "/home/craigwarner/u64share/Programming/mbg_v1/MandelbrotBackground/"
+#topPath = "../"
 
 all_images = []
 
 # CLI Parser
 parser = argparse.ArgumentParser(description='Mandelbrot Background')
 parser.add_argument("--ifile", help="Template file (.hjson)", default="/snap/mandelbrot-background/current/templates/v2/eight.hjson")
+#parser.add_argument("--ifile", help="Template file (.hjson)", default="../templates/v2/eight.hjson")
 #parser.add_argument("--ifile", help="Template file (.hjson)", default="/home/craigwarner/u64share/Programming/mbg_v1/MandelbrotBackground/templates/v2/eight.hjson")
 parser.add_argument("--ofile", help="Output file (.bmp)", default="mbg8.bmp")
 parser.add_argument("--ozfile", help="Output Zoom path file (.hjson)", default="")

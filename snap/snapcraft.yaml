@@ -39,10 +39,8 @@ parts:
     plugin: python
 #    python-version: python3
     python-packages:
-    - pyqt5
     - hjson 
     - argparse
-    - decimal
     source-type: local 
 #    source: [ 'bin', 'display', 'mbg', 'templates', 'zoom', 'mbg.py'] 
     source: . 
