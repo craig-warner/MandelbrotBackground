@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mandelbrot-background", #
-    version="1.9.0",
+    version="1.11.0",
     author="Craig Warner",
     author_email="cgwarner2014@gmail.com",
     description="Mandelbrot Background",
@@ -20,9 +20,10 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
-    #install_requires=['PyQt5>=5.8.0','hjson>=3.1.0','jsonformatter>=0.3.2','argparse>=1.4.0'],
-    install_requires=['hjson>=3.1.0','jsonformatter>=0.3.2','argparse>=1.4.0'],
+    python_requires='>=3.10',
+    #install_requires=['PyQt5>=5.15.11','argparse>=1.4.0'],
+    install_requires=['PyQt5>=5.15.11','hjson>=3.1.0','argparse>=1.4.0'],
+    #install_requires=['hjson>=3.1.0','jsonformatter>=0.3.2','argparse>=1.4.0'],
     scripts=['bin/mandelbrot-background',
             "bin/bmp.py",
             "bin/desktop.py",

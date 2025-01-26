@@ -29,9 +29,22 @@ options:
 ## Snap Build Steps
 
 <pre>
-1) Test locally
-1) %snapcraft
-2) %snapcraft install
+%snapcraft
+// debug snapcraft
+%snapcraft --debug
+// Install locally
+%snap install --dangerous mandelbrot-background_1.10_amd64.snap
+// debug 
+%snap run --shell mandelbrot-background
+// remove app from machine 
+%snap remove mandelbrot-background
+// start over snapping 
+ %snapcraft clean
+</pre>
+## LXD Steps
+<pre>
+ %sudo apt install lxd
+ %sudo adduser username lxd
 </pre>
 
 

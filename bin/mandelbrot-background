@@ -17,7 +17,6 @@ import sys
 import argparse
 import hjson
 import json
-from jsonformatter import JsonFormatter
 import time
 
 # High Precision Floating Point
